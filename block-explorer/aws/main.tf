@@ -1,6 +1,8 @@
 provider "aws" {
   version    = "~> 2.0"
-  region     = "eu-west-2"
+  region = "${var.region}"
+  access_key = "${var.access-key}"
+  secret_key = "${var.secret-key}"
 }
 
 /*
@@ -111,7 +113,7 @@ resource "aws_s3_bucket_notification" "bucket-notification-block-explorer" {
   Elastic IP
 */
 resource "aws_eip_association" "eip-block-explorer" {
-  instance_id = "${aws_instance.handler-block-explorer.id}"
+  network_interface_id = "${aws_network_interface.handler-app-block-explorer.id}"
   allocation_id = "eipalloc-0e0205a5323ebfb07"
 }
 
@@ -152,9 +154,23 @@ resource "aws_instance" "handler-block-explorer" {
 
   connection {
     type = "ssh"
-    user = "linux-ec2"
-    private_key = "${file("/home/mchrapek/Work/constellation-key/aws_id_rsa")}"
+    user = "ec2-user"
+    host = "${aws_eip_association.eip-block-explorer.public_ip}"
+    private_key = "${file("/home/mchrapek/Work/constellation-key/constellation-labs-block-explorer-stack.pem")}"
   }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo yum -y update",
+      "sudo yum -y install java-1.8.0-openjdk-headless",
+      "mkdir /home/ec2-user/block-explorer-handler"
+    ]
+  }
+
+//  provisioner "file" {
+//    destination = "/home/ec2-user/block-explorer-handler"
+//    source = ""
+//  }
 }
 
 resource "aws_security_group" "security-group-handler-block-explorer" {

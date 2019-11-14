@@ -5,3 +5,4 @@ target
 project/target
 *.terraform/
 terraform.*
+*.tfvars
