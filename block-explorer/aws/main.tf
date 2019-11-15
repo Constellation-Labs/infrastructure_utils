@@ -191,3 +191,68 @@ resource "aws_security_group" "security-group-handler-block-explorer" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+/*
+  ElasticSearch
+*/
+resource "aws_security_group" "security-group-elasticsearch-block-explorer" {
+  name = "security-group-elasticsearch-block-explorer"
+  vpc_id = "${aws_vpc.vpc-block-explorer.id}"
+
+  ingress {
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = ["${aws_vpc.vpc-block-explorer.cidr_block}"]
+  }
+}
+
+resource "aws_iam_service_linked_role" "es" {
+  aws_service_name = "es.amazonaws.com"
+}
+
+resource "aws_elasticsearch_domain" "es-domain-block-explorer" {
+  domain_name = "es-block-explorer"
+  elasticsearch_version = "7.1"
+
+  ebs_options {
+    ebs_enabled = true
+    volume_type = "gp2"
+    volume_size = "200"
+  }
+
+  cluster_config {
+    instance_type = "m4.large.elasticsearch"
+  }
+
+  vpc_options {
+    subnet_ids = ["${aws_subnet.subnet-block-explorer.id}"]
+    security_group_ids = ["${aws_security_group.security-group-elasticsearch-block-explorer.id}"]
+  }
+
+  snapshot_options {
+    automated_snapshot_start_hour = 20
+  }
+
+  access_policies = <<CONFIG
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "es:*",
+            "Principal": "*",
+            "Effect": "Allow",
+            "Resource": "arn:aws:es:*/*"
+        }
+    ]
+}
+CONFIG
+
+  tags = {
+    Name = "block-explorer-elasticsearch"
+  }
+
+  depends_on = [
+    "aws_iam_service_linked_role.es",
+  ]
+}
