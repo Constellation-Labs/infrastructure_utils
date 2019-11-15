@@ -17,6 +17,7 @@ val MockitoVersion = "1.6.2"
 val ScalaCheckVersion = "1.14.2"
 val ScalaTestVersion = "3.0.8"
 val Slf4jApiVersion = "1.7.25"
+val TwitterChillVersion = "0.9.3"
 val TypesafeVersion = "1.4.0"
 
 unmanagedJars in Compile += file("constellation-assembly-1.0.12.jar")
@@ -28,7 +29,8 @@ libraryDependencies ++= Seq(
   "com.amazonaws"               % "aws-lambda-java-core"        % AwsLambdaJavaCoreVersion,
   "com.amazonaws"               % "aws-lambda-java-events"      % AwsLambdaJavaEventsVersion,
   "com.github.pathikrit"        %% "better-files"               % BetterFilesVersion, 
-  "com.typesafe"                % "config"                      % TypesafeVersion,
+  "com.typesafe"                % "config"                      % TypesafeVersion, 
+  "com.twitter"                 %% "chill"                      % TwitterChillVersion,
   "commons-io"                  % "commons-io"                  % CommonIOVersion,
   "ch.qos.logback"              % "logback-classic"             % LogbackVersion, 
   "io.circe"                    %% "circe-core"                 % CirceVersion,
@@ -71,7 +73,7 @@ scalacOptions ++= {
         "-Xlint:infer-any",
         "-Xlint:missing-interpolator",
         "-Xlint:nullary-override",
-        "-Xlint:nullary-unit",
+//        "-Xlint:nullary-unit",
         "-Xlint:option-implicit",
         "-Xlint:package-object-classes",
         "-Xlint:poly-implicit-overload",
@@ -81,13 +83,13 @@ scalacOptions ++= {
         "-Xlint:unsound-match",
         "-Yno-adapted-args",
         "-Ypartial-unification",
-        "-Ywarn-dead-code",
+//        "-Ywarn-dead-code",
         "-Ywarn-extra-implicit",
         "-Ywarn-infer-any",
         "-Ywarn-inaccessible",
         "-Ywarn-numeric-widen",
         "-Ywarn-nullary-override",
-        "-Ywarn-nullary-unit",
+//        "-Ywarn-nullary-unit",
         "-Ywarn-unused:implicits",
         "-Ywarn-unused:imports",
         "-Ywarn-unused:locals",
