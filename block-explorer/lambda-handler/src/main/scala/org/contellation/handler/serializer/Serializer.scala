@@ -1,6 +1,7 @@
 package org.contellation.handler.serializer
 
 import com.twitter.chill.{KryoPool, ScalaKryoInstantiator}
+import org.constellation.serializer.ConstellationKryoRegistrar
 
 object Serializer extends {
 
@@ -14,7 +15,7 @@ object Serializer extends {
     guessThreads,
     new ScalaKryoInstantiator()
       .setRegistrationRequired(true)
-      .withRegistrar(new RegisterSerializer()),
+      .withRegistrar(new ConstellationKryoRegistrar()),
     32,
     1024 * 1024 * 100
   )
