@@ -166,11 +166,6 @@ resource "aws_instance" "handler-block-explorer" {
       "mkdir /home/ec2-user/block-explorer-handler"
     ]
   }
-
-//  provisioner "file" {
-//    destination = "/home/ec2-user/block-explorer-handler"
-//    source = ""
-//  }
 }
 
 resource "aws_security_group" "security-group-handler-block-explorer" {
@@ -200,9 +195,23 @@ resource "aws_security_group" "security-group-elasticsearch-block-explorer" {
   vpc_id = "${aws_vpc.vpc-block-explorer.id}"
 
   ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["${aws_vpc.vpc-block-explorer.cidr_block}"]
+  }
+
+  ingress {
     from_port = 443
     to_port = 443
     protocol = "tcp"
+    cidr_blocks = ["${aws_vpc.vpc-block-explorer.cidr_block}"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
     cidr_blocks = ["${aws_vpc.vpc-block-explorer.cidr_block}"]
   }
 }
