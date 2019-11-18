@@ -11,7 +11,7 @@ import scala.util.Try
 class SQSHandler {
 
   private val queueUrl =
-    "https://sqs.eu-west-2.amazonaws.com/150340915792/s3-event-block-explorer-queue"
+    "https://sqs.us-west-1.amazonaws.com/150340915792/s3-event-block-explorer-queue"
 
   private val SQSClient: AmazonSQS = {
     AmazonSQSClientBuilder.defaultClient()
