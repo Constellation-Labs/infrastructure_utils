@@ -114,7 +114,7 @@ resource "aws_s3_bucket_notification" "bucket-notification-block-explorer" {
 */
 resource "aws_eip_association" "eip-block-explorer" {
   network_interface_id = "${aws_network_interface.handler-app-block-explorer.id}"
-  allocation_id = "eipalloc-0e0205a5323ebfb07"
+  allocation_id = "eipalloc-0ae41cb03f4a0f544"
 }
 
 
@@ -236,15 +236,21 @@ resource "aws_elasticsearch_domain" "es-domain-block-explorer" {
 
   access_policies = <<CONFIG
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": "es:*",
-            "Principal": "*",
-            "Effect": "Allow",
-            "Resource": "arn:aws:es:*/*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "*"
+        ]
+      },
+      "Action": [
+        "es:*"
+      ],
+      "Resource": "arn:aws:es:us-west-1:150340915792:domain/es-block-explorer/*"
+    }
+  ]
 }
 CONFIG
 
