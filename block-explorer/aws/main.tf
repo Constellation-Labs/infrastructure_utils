@@ -163,7 +163,7 @@ resource "aws_instance" "handler-block-explorer" {
     inline = [
       "sudo yum -y update",
       "sudo yum -y install java-1.8.0-openjdk-headless",
-      "sudo yum -y polkit-devel",
+      "sudo yum -y install polkit-devel",
       "mkdir /home/ec2-user/block-explorer-handler"
     ]
   }
