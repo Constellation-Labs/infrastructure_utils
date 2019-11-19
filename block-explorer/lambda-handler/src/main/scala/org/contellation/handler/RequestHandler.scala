@@ -24,13 +24,13 @@ object RequestHandler {
     while (true) {
 
       try {
-        println("Request Handler Application : Receive New Snapshots")
+        println("Request Handler Application : Try to receive new snapshots")
         val r: List[(String, String)] = sqsHandler.receiveNewSnapshots()
+        println(s"RECEIVED SNAPSHOTS SQS : ${r.size}")
         val s = s3Handler.getSnapshots(r)
-        println(s"DOWNLOADED SNAPSHOTS: ${s.size}")
+        println(s"DOWNLOADED SNAPSHOTS : ${s.size}")
         s.map(snap => {
           val e = prepareDataForElasticSearch(snap).asJson
-          println(e.toString())
           esSender.sendToElasticSearch(e.hashCode().toString, e.toString())
         })
 
