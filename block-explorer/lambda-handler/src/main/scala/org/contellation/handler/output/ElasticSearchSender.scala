@@ -15,6 +15,7 @@ class ElasticSearchSender {
       .put(uri"$HOST/$INDEX/$SCHEMA/$id")
       .body(objectToSend)
       .contentType("application/json")
+
     val response: Identity[Response[Either[String, String]]] = request.send()
 
     println(response)

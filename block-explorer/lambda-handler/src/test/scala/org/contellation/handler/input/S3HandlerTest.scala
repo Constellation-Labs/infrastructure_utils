@@ -10,7 +10,7 @@ class S3HandlerTest extends FunSuite with ArgumentMatchersSugar with Matchers {
 
   private val snapshotFolder: String = "src/test/resources/snapshot"
 
-  test("should load and deserializer snapshots") {
+  test("should load and deserialize snapshots") {
     val parsed = File(snapshotFolder).list.toSeq
       .map(s => Serializer.deserializeCast[StoredSnapshot](s.byteArray))
       .toList

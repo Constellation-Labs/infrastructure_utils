@@ -14,23 +14,17 @@ class S3Handler {
     AmazonS3ClientBuilder.defaultClient()
   }
 
-  def getSnapshots(toDownload: List[(String, String)]): List[StoredSnapshot] = {
+  def getSnapshots(toDownload: List[(String, String)]): List[StoredSnapshot] =
     getListOfObjects(toDownload).flatMap(s => Try(parseToSnapshot(s)).toOption)
-  }
 
   private def parseToSnapshot(s3Object: S3Object): StoredSnapshot = {
-    val objectBytes: Array[Byte] =
-      IOUtils.toByteArray(s3Object.getObjectContent)
+    val objectBytes: Array[Byte] = IOUtils.toByteArray(s3Object.getObjectContent)
     Serializer.deserializeCast[StoredSnapshot](objectBytes)
   }
 
-  private def getListOfObjects(
-    toDownload: List[(String, String)]
-  ): List[S3Object] = {
+  private def getListOfObjects(toDownload: List[(String, String)]): List[S3Object] =
     toDownload.flatMap(o => Try(getObject(o._1, o._2)).toOption)
-  }
 
-  private def getObject(bucketName: String, objectKey: String): S3Object = {
+  private def getObject(bucketName: String, objectKey: String): S3Object =
     S3Client.getObject(bucketName, objectKey)
-  }
 }
