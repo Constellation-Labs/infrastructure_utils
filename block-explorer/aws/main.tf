@@ -114,7 +114,7 @@ resource "aws_s3_bucket_notification" "bucket-notification-block-explorer" {
 */
 resource "aws_eip_association" "eip-block-explorer" {
   network_interface_id = "${aws_network_interface.handler-app-block-explorer.id}"
-  allocation_id = "eipalloc-0ae41cb03f4a0f544"
+  allocation_id = "${var.elastic-ip-id}"
 }
 
 
@@ -163,7 +163,34 @@ resource "aws_instance" "handler-block-explorer" {
     inline = [
       "sudo yum -y update",
       "sudo yum -y install java-1.8.0-openjdk-headless",
+      "sudo yum -y polkit-devel",
       "mkdir /home/ec2-user/block-explorer-handler"
+    ]
+  }
+
+  provisioner "file" {
+    source = "start"
+    destination = "/home/ec2-user/block-explorer-handler/start"
+  }
+
+  provisioner "file" {
+    source = "block-explorer-handler.jar"
+    destination = "/home/ec2-user/block-explorer-handler/block-explorer-handler.jar"
+  }
+
+  provisioner "file" {
+    source = "block-explorer-handler.service"
+    destination = "/tmp/block-explorer-handler.service"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo chmod 774 /home/ec2-user/block-explorer-handler/start",
+      "sudo cp /tmp/block-explorer-handler.service /etc/systemd/system/multi-user.target.wants/block-explorer-handler.service",
+      "sudo rm -rf /tmp/block-explorer-handler.service",
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable block-explorer-handler.service",
+      "sudo systemctl start block-explorer-handler.service"
     ]
   }
 }
@@ -219,6 +246,7 @@ resource "aws_security_group" "security-group-elasticsearch-block-explorer" {
 resource "aws_iam_service_linked_role" "es" {
   aws_service_name = "es.amazonaws.com"
 }
+
 
 resource "aws_elasticsearch_domain" "es-domain-block-explorer" {
   domain_name = "es-block-explorer"
