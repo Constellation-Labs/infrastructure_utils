@@ -20,7 +20,7 @@ val SttpCoreVersion = "2.0.0-RC1"
 val TwitterChillVersion = "0.9.3"
 val TypesafeVersion = "1.4.0"
 
-unmanagedJars in Compile += file("constellation-assembly-1.0.12.jar")
+unmanagedJars in Runtime += file("constellation-assembly-1.0.12.jar")
 
 // format: off
 libraryDependencies ++= Seq(
@@ -123,3 +123,5 @@ assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case x                             => MergeStrategy.first
 }
+
+Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat

@@ -15,7 +15,7 @@ class S3HandlerTest extends FunSuite with ArgumentMatchersSugar with Matchers {
       .map(s => Serializer.deserializeCast[StoredSnapshot](s.byteArray))
       .toList
 
-    parsed.size shouldBe 1
+    parsed.size shouldBe 2
     parsed.head.isInstanceOf[StoredSnapshot] shouldBe true
   }
 }
