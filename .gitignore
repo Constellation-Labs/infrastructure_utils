@@ -8,3 +8,4 @@ terraform.*
 *.tfvars
 constellation-assembly-*.jar
 block-explorer-handler-*.jar
+block-explorer-api-*.jar
