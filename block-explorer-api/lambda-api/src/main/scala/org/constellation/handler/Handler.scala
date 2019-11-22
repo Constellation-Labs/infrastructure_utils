@@ -1,10 +1,21 @@
 package org.constellation.handler
 
-import scala.collection.JavaConverters._
-import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
+import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
+import com.sksamuel.elastic4s.{RequestFailure, RequestSuccess}
+import io.circe.Decoder
+import io.circe.generic.semiauto._
+import org.constellation.handler.model.TransactionRequest
+import sttp.client._
+
+import scala.collection.JavaConverters._
 
 object Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
+
+  implicit val transactionRequestEncoder: Decoder[TransactionRequest] = deriveDecoder[TransactionRequest]
+
+  private final val HOST: String = "vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es.amazonaws.com"
+  private val elasticSearchService: ElasticSearchService = new ElasticSearchService
 
   override def handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
     def log(message: String): Unit = context.getLogger.log(message)
@@ -13,14 +24,41 @@ object Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayPro
     log(s"Method : ${input.getHttpMethod}")
     log(s"Proxy path : ${input.getPath}")
     log(s"Proxy parameters : ${input.getPathParameters}")
+    log(s"Query parameters : ${input.getQueryStringParameters}")
+    log(s"Check connection to elasticsearch : ${checkConnectionToEs()}")
 
+    val id = input.getQueryStringParameters.get("id")
+    val response = elasticSearchService.findTransaction(id) match {
+      case RequestSuccess(status, body, headers, result) => successResponse(body.getOrElse(""))
+      case RequestFailure(status, body, headers, error)  => errorResponse(error.reason, status)
+    }
+    log(s"Response : ${response.getStatusCode}")
+
+    response
+  }
+
+  private def checkConnectionToEs(): Boolean = {
+    implicit val backend: SttpBackend[Identity, Nothing, NothingT] = HttpURLConnectionBackend()
+    basicRequest.get(uri"$HOST").send().code.isSuccess
+  }
+
+  private def successResponse(body: String, statusCode: Integer = 200) =
     new APIGatewayProxyResponseEvent()
       .withStatusCode(200)
       .withHeaders(
         Map(
-          "Content-Type" -> "text/raw"
+          "Content-Type" -> "text/json"
         ).asJava
       )
-      .withBody("OK")
-  }
+      .withBody(body)
+
+  private def errorResponse(error: String, statusCode: Integer) =
+    new APIGatewayProxyResponseEvent()
+      .withStatusCode(statusCode)
+      .withHeaders(
+        Map(
+          "Content-Type" -> "text/json"
+        ).asJava
+      )
+      .withBody(s""" {"error": "$error"} """)
 }
