@@ -24,7 +24,7 @@ class ElasticSearchSender(
     transactions.foreach(t => sendTransaction(t.hash, t))
   }
 
-  private def sendSnapshot(id: String, snapshot: Snapshot): Unit =
+  private def sendSnapshot(id: String, snapshot: Snapshot) =
     sendToElasticSearch(
       id,
       configLoader.elasticsearchSnapshotsIndex,
@@ -32,7 +32,7 @@ class ElasticSearchSender(
       snapshotJsonMapper.mapSnapshotToJson(snapshot).toString()
     )
 
-  private def sendCheckpointBlock(id: String, checkpointBlock: CheckpointBlock): Unit =
+  private def sendCheckpointBlock(id: String, checkpointBlock: CheckpointBlock) =
     sendToElasticSearch(
       id,
       configLoader.elasticsearchCheckpointBlocksIndex,
@@ -40,7 +40,7 @@ class ElasticSearchSender(
       snapshotJsonMapper.mapCheckpointBlockToJson(checkpointBlock).toString()
     )
 
-  private def sendTransaction(id: String, transaction: Transaction): Unit =
+  private def sendTransaction(id: String, transaction: Transaction) =
     sendToElasticSearch(
       id,
       configLoader.elasticsearchTransactionsIndex,

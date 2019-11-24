@@ -8,9 +8,7 @@ import scala.util.Try
 
 class SQSMessageJsonExtractor {
 
-  private type S3ObjectProperties = (String, String)
-
-  def extractMessage(message: Message): Try[List[S3ObjectProperties]] = Try {
+  def extractMessage(message: Message): Try[List[(String, String)]] = Try {
     val json = parse(message.getBody).right.get
     val jsonRecords = json.hcursor.downField("Records").values.get
 

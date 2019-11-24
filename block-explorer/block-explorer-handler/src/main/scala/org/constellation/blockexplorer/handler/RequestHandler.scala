@@ -9,11 +9,14 @@ import org.constellation.blockexplorer.handler.mapper.{
 }
 import org.constellation.blockexplorer.handler.output.ElasticSearchSender
 import org.constellation.blockexplorer.handler.serializer.{KryoSerializer, Serializer}
+import org.slf4j.{Logger, LoggerFactory}
 
 object RequestHandler {
 
+  val logger: Logger = LoggerFactory.getLogger(getClass)
+
   def main(args: Array[String]): Unit = {
-    println("Request Handler : Init started")
+    logger.info("Request Handler : Init started")
     val configLoader: ConfigLoader = new ConfigLoader
     val serializer: Serializer = new KryoSerializer
     val sqsMessageJsonExtractor: SQSMessageJsonExtractor = new SQSMessageJsonExtractor
@@ -23,20 +26,22 @@ object RequestHandler {
     val sqsHandler: SQSHandler = new SQSHandler(configLoader, sqsMessageJsonExtractor)
     val s3Handler: S3Handler = new S3Handler(serializer)
     val esSender: ElasticSearchSender = new ElasticSearchSender(configLoader, snapshotJsonMapper, storedSnapshotMapper)
-    println("Request Handler : Init finished")
+    logger.info("Request Handler : Init finished")
 
     while (true) {
       try {
-        println("Try to receive new snapshots")
-        val r: List[(String, String)] = sqsHandler.receiveNewSnapshots()
-        println(s"Received snapshot SQS : ${r.size}")
-        val s = s3Handler.getSnapshots(r)
-        println(s"Downloaded snapshot : ${s.size}")
-        s.foreach(storedSnapshot => esSender.mapAndSendToElasticSearch(storedSnapshot))
-        println(s"Sending finished")
+        logger.info("Try to receive new snapshots")
+
+        val received: List[(String, String)] = sqsHandler.receiveNewSnapshots()
+        logger.info(s"Received snapshot SQS : ${received.size}")
+
+        val downloaded = s3Handler.getSnapshots(received)
+        logger.info(s"Downloaded snapshot : ${downloaded.size}")
+
+        downloaded.foreach(storedSnapshot => esSender.mapAndSendToElasticSearch(storedSnapshot))
+        logger.info(s"Sending finished")
       } catch {
-        case e: Throwable =>
-          println(e.getMessage)
+        case e: Throwable => logger.error(e.getMessage)
       }
     }
   }
