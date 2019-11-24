@@ -214,6 +214,19 @@ resource "aws_security_group" "security-group-handler-block-explorer" {
   }
 }
 
+resource "aws_security_group" "security-group-access-to-vpc" {
+  name = "security-group-access-to-vpc"
+  vpc_id = "${aws_vpc.vpc-block-explorer.id}"
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
 /*
   ElasticSearch
 */

@@ -1,0 +1,18 @@
+{
+  "snapshot" : {
+    "mappings" : {
+      "_source": {
+        "enabled": false
+      },
+      "dynamic" : false,
+      "properties" : {
+        "hash" : {
+          "type" : "keyword"
+        },
+        "checkpointBlocks" : {
+          "type" : "keyword"
+        }
+      }
+    }
+  }
+}

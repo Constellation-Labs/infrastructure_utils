@@ -1,0 +1,41 @@
+{
+  "checkpoint-block" : {
+    "mappings" : {
+      "_source": {
+        "enabled": false
+      },
+      "dynamic" : false,
+      "properties" : {
+        "hash" : {
+          "type" : "keyword"
+        },
+        "messages" : {
+          "type" : "keyword"
+        },
+        "notifications" : {
+          "type" : "keyword"
+        },
+        "observations" : {
+          "type" : "keyword"
+        },
+        "children" : {
+          "type" : "long"
+        },
+        "height" : {
+          "properties" : {
+            "dynamic" : false,
+            "min" : {
+              "type" : "long"
+            },
+            "max" : {
+              "type" : "long"
+            }
+          }
+        },
+        "snapshotHash" : {
+          "type" : "keyword"
+        }
+      }
+    }
+  }
+}
