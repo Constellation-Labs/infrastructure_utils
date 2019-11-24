@@ -1,40 +1,38 @@
 {
-  "checkpoint-block" : {
-    "mappings" : {
-      "_source": {
-        "enabled": false
+  "mappings": {
+    "dynamic": false,
+    "_source": {
+      "enabled": true
+    },
+    "properties": {
+      "hash": {
+        "type": "keyword"
       },
-      "dynamic" : false,
-      "properties" : {
-        "hash" : {
-          "type" : "keyword"
-        },
-        "messages" : {
-          "type" : "keyword"
-        },
-        "notifications" : {
-          "type" : "keyword"
-        },
-        "observations" : {
-          "type" : "keyword"
-        },
-        "children" : {
-          "type" : "long"
-        },
-        "height" : {
-          "properties" : {
-            "dynamic" : false,
-            "min" : {
-              "type" : "long"
-            },
-            "max" : {
-              "type" : "long"
-            }
+      "messages": {
+        "type": "keyword"
+      },
+      "notifications": {
+        "type": "keyword"
+      },
+      "observations": {
+        "type": "keyword"
+      },
+      "children": {
+        "type": "long"
+      },
+      "height": {
+        "dynamic": false,
+        "properties": {
+          "min": {
+            "type": "long"
+          },
+          "max": {
+            "type": "long"
           }
-        },
-        "snapshotHash" : {
-          "type" : "keyword"
         }
+      },
+      "snapshotHash": {
+        "type": "keyword"
       }
     }
   }

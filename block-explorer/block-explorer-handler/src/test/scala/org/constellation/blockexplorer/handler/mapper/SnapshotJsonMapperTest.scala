@@ -28,7 +28,8 @@ class SnapshotJsonMapperTest extends FunSuite with ArgumentMatchersSugar with Ma
       .toList
       .head
 
-    storedSnapshotMapper.mapSnapshot(parsed).asJson
+    val s = storedSnapshotMapper.mapSnapshot(parsed).asJson
+    println(s)
   }
 
   test("mapCheckpointBlock") {

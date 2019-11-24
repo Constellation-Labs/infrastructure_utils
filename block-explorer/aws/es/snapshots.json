@@ -1,17 +1,15 @@
 {
-  "snapshot" : {
-    "mappings" : {
-      "_source": {
-        "enabled": false
+  "mappings": {
+    "dynamic": false,
+    "_source": {
+      "enabled": true
+    },
+    "properties": {
+      "hash": {
+        "type": "keyword"
       },
-      "dynamic" : false,
-      "properties" : {
-        "hash" : {
-          "type" : "keyword"
-        },
-        "checkpointBlocks" : {
-          "type" : "keyword"
-        }
+      "checkpointBlocks": {
+        "type": "keyword"
       }
     }
   }

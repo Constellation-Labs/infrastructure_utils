@@ -78,6 +78,7 @@ lazy val versions = new {
   val BetterFilesVersion            =       "3.8.0"
   val CirceVersion                  =       "0.12.3"
   val CommonIOVersion               =       "2.6"
+  val Elastic4sVersion              =       "7.3.1"
   val KindProjectorVersion          =       "0.10.3"
   val LogbackVersion                =       "1.2.3"
   val MockitoVersion                =       "1.6.2"
@@ -89,31 +90,47 @@ lazy val versions = new {
   val TypesafeVersion               =       "1.4.0"
 }
 
+lazy val sharedDependencies = Seq(
+  "com.amazonaws"                   % "aws-lambda-java-core"        % versions.AwsLambdaJavaCoreVersion,
+  "com.amazonaws"                   % "aws-lambda-java-events"      % versions.AwsLambdaJavaEventsVersion,
+  "com.softwaremill.sttp.client"    %% "core"                       % versions.SttpCoreVersion,
+  "io.circe"                        %% "circe-core"                 % versions.CirceVersion,
+  "io.circe"                        %% "circe-generic"              % versions.CirceVersion,
+  "io.circe"                        %% "circe-parser"               % versions.CirceVersion,
+  // Test dependencies
+  "org.mockito"                     %% "mockito-scala"              % versions.MockitoVersion           % Test,
+  "org.mockito"                     %% "mockito-scala-cats"         % versions.MockitoVersion           % Test,
+  "org.scalacheck"                  %% "scalacheck"                 % versions.ScalaCheckVersion        % Test,
+  "org.scalatest"                   %% "scalatest"                  % versions.ScalaTestVersion         % Test
+)
+
+lazy val apiDependencies = Seq(
+  "com.sksamuel.elastic4s"          %% "elastic4s-core"             % versions.Elastic4sVersion,
+  "com.sksamuel.elastic4s"          %% "elastic4s-client-esjava"    % versions.Elastic4sVersion,
+  "com.sksamuel.elastic4s"          %% "elastic4s-http-streams"     % versions.Elastic4sVersion,
+  // Test dependencies
+  "com.sksamuel.elastic4s"          %% "elastic4s-testkit"          % versions.Elastic4sVersion          % Test
+) ++ sharedDependencies
+
+lazy val configDependencies = Seq(
+  "com.typesafe"                    % "config"                      % versions.TypesafeVersion
+)
+
 lazy val rootDependencies = Seq(
   "com.amazonaws"                   % "aws-java-sdk-s3"             % versions.AwsJavaSdkS3Version,
   "com.amazonaws"                   % "aws-java-sdk-sqs"            % versions.AwsJavaSdkSQSVersion,
   "com.amazonaws"                   % "aws-lambda-java-core"        % versions.AwsLambdaJavaCoreVersion,
   "com.amazonaws"                   % "aws-lambda-java-events"      % versions.AwsLambdaJavaEventsVersion,
   "com.github.pathikrit"            %% "better-files"               % versions.BetterFilesVersion,
-  "com.softwaremill.sttp.client"    %% "core"                       % versions.SttpCoreVersion,
-  "com.typesafe"                    % "config"                      % versions.TypesafeVersion, 
   "com.twitter"                     %% "chill"                      % versions.TwitterChillVersion,
   "commons-io"                      % "commons-io"                  % versions.CommonIOVersion,
-  "ch.qos.logback"                  % "logback-classic"             % versions.LogbackVersion, 
-  "io.circe"                        %% "circe-core"                 % versions.CirceVersion,
-  "io.circe"                        %% "circe-generic"              % versions.CirceVersion,
-  "io.circe"                        %% "circe-parser"               % versions.CirceVersion,
-  "org.slf4j"                       % "slf4j-api"                   % versions.Slf4jApiVersion,
-  // Test dependencies
-  "org.mockito"                     %% "mockito-scala"              % versions.MockitoVersion % Test,
-  "org.mockito"                     %% "mockito-scala-cats"         % versions.MockitoVersion % Test,
-  "org.scalacheck"                  %% "scalacheck"                 % versions.ScalaCheckVersion % Test,
-  "org.scalatest"                   %% "scalatest"                  % versions.ScalaTestVersion % Test
-)
+  "ch.qos.logback"                  % "logback-classic"             % versions.LogbackVersion,
+  "org.slf4j"                       % "slf4j-api"                   % versions.Slf4jApiVersion
+) ++ sharedDependencies
 // format: on
 
 lazy val root = (project in file("."))
-  .dependsOn(schema)
+  .dependsOn(schema, config)
   .enablePlugins(BuildInfoPlugin)
   .settings(
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
@@ -131,6 +148,25 @@ lazy val schema = (project in file("schema"))
     buildInfoKeys := Seq[BuildInfoKey](version),
     buildInfoPackage := "org.constellation.blockexplorer.schema",
     buildInfoOptions ++= Seq(BuildInfoOption.BuildTime, BuildInfoOption.ToMap)
+  )
+
+lazy val api = (project in file("api"))
+  .dependsOn(schema, config)
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    buildInfoKeys := Seq[BuildInfoKey](version),
+    buildInfoPackage := "org.constellation.blockexplorer.api",
+    buildInfoOptions ++= Seq(BuildInfoOption.BuildTime, BuildInfoOption.ToMap),
+    libraryDependencies ++= apiDependencies
+  )
+
+lazy val config = (project in file("config"))
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    buildInfoKeys := Seq[BuildInfoKey](version),
+    buildInfoPackage := "org.constellation.blockexplorer.config",
+    buildInfoOptions ++= Seq(BuildInfoOption.BuildTime, BuildInfoOption.ToMap),
+    libraryDependencies ++= configDependencies
   )
 
 // Filter out compiler flags to make the repl experience functional...

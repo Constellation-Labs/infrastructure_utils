@@ -2,7 +2,7 @@ package org.constellation.blockexplorer.handler.input
 
 import com.amazonaws.services.sqs.model.{DeleteMessageRequest, DeleteMessageResult, Message, ReceiveMessageRequest}
 import com.amazonaws.services.sqs.{AmazonSQS, AmazonSQSClientBuilder}
-import org.constellation.blockexplorer.handler.config.ConfigLoader
+import org.constellation.blockexplorer.config.ConfigLoader
 import org.constellation.blockexplorer.handler.mapper.SQSMessageJsonExtractor
 
 import scala.collection.JavaConverters._

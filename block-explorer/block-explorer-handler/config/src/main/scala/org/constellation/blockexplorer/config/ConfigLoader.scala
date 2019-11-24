@@ -1,4 +1,4 @@
-package org.constellation.blockexplorer.handler.config
+package org.constellation.blockexplorer.config
 
 import com.typesafe.config.{Config, ConfigFactory}
 
@@ -22,13 +22,4 @@ class ConfigLoader {
 
   val elasticsearchSnapshotsIndex: String =
     elasticsearch.getString("indexes.snapshots")
-
-  val elasticsearchTransactionsMapping: String =
-    elasticsearch.getString("mappings.transactions")
-
-  val elasticsearchCheckpointBlocksMapping: String =
-    elasticsearch.getString("mappings.checkpoint-blocks")
-
-  val elasticsearchSnapshotsMapping: String =
-    elasticsearch.getString("mappings.snapshots")
 }

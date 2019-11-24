@@ -1,39 +1,31 @@
 {
-  "transactions" : {
-    "mappings" : {
-      "dynamic" : false,
-      "_source": {
-        "enabled": false
+  "mappings": {
+    "dynamic": false,
+    "_source": {
+      "enabled": true
+    },
+    "properties": {
+      "hash": {
+        "type": "keyword"
       },
-      "properties" : {
-        "hash" : {
-          "type" : "keyword"
-        },
-        "amount" : {
-          "type" : "long"
-        },
-        "fee" : {
-          "type" : "long"
-        },
-        "isDummy" : {
-          "type" : "boolean"
-        },
-        "lastTransactionRef" : {
-          "properties" : {
-            "hash" : {
-              "type" : "keyword"
-            },
-            "ordinal" : {
-              "type" : "long"
-            }
+      "amount": {
+        "type": "long"
+      },
+      "lastTransactionRef": {
+        "properties": {
+          "hash": {
+            "type": "keyword"
+          },
+          "ordinal": {
+            "type": "long"
           }
-        },
-        "snapshotHash" : {
-          "type" : "keyword"
-        },
-        "checkpointBlockHash" : {
-          "type" : "keyword"
         }
+      },
+      "snapshotHash": {
+        "type": "keyword"
+      },
+      "checkpointBlockHash": {
+        "type": "keyword"
       }
     }
   }

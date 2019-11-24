@@ -1,6 +1,6 @@
 package org.constellation.blockexplorer.handler
 
-import org.constellation.blockexplorer.handler.config.ConfigLoader
+import org.constellation.blockexplorer.config.ConfigLoader
 import org.constellation.blockexplorer.handler.input.{S3Handler, SQSHandler}
 import org.constellation.blockexplorer.handler.mapper.{
   SQSMessageJsonExtractor,
