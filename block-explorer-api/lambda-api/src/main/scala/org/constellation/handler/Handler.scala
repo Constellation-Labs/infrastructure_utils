@@ -18,23 +18,11 @@ object Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayPro
   private val elasticSearchService: ElasticSearchService = new ElasticSearchService
 
   override def handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
-    def log(message: String): Unit = context.getLogger.log(message)
-
-    log("-- Received new request --")
-    log(s"Method : ${input.getHttpMethod}")
-    log(s"Proxy path : ${input.getPath}")
-    log(s"Proxy parameters : ${input.getPathParameters}")
-    log(s"Query parameters : ${input.getQueryStringParameters}")
-    log(s"Check connection to elasticsearch : ${checkConnectionToEs()}")
-
     val id = input.getQueryStringParameters.get("id")
-    val response = elasticSearchService.findTransaction(id) match {
+    elasticSearchService.findTransaction(id) match {
       case RequestSuccess(status, body, headers, result) => successResponse(body.getOrElse(""))
       case RequestFailure(status, body, headers, error)  => errorResponse(error.reason, status)
     }
-    log(s"Response : ${response.getStatusCode}")
-
-    response
   }
 
   private def checkConnectionToEs(): Boolean = {
