@@ -2,9 +2,9 @@ package org.constellation.handler
 
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
-import com.sksamuel.elastic4s.{RequestFailure, RequestSuccess}
 import io.circe.Decoder
 import io.circe.generic.semiauto._
+import org.constellation.handler.mapper.SourceExtractor
 import org.constellation.handler.model.TransactionRequest
 import sttp.client._
 
@@ -15,13 +15,15 @@ object Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayPro
   implicit val transactionRequestEncoder: Decoder[TransactionRequest] = deriveDecoder[TransactionRequest]
 
   private final val HOST: String = "vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es.amazonaws.com"
-  private val elasticSearchService: ElasticSearchService = new ElasticSearchService
+
+  private val sourceExtractor: SourceExtractor = new SourceExtractor
+  private val elasticSearchService: ElasticSearchService = new ElasticSearchService(sourceExtractor)
 
   override def handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
     val id = input.getQueryStringParameters.get("id")
     elasticSearchService.findTransaction(id) match {
-      case RequestSuccess(status, body, headers, result) => successResponse(body.getOrElse(""))
-      case RequestFailure(status, body, headers, error)  => errorResponse(error.reason, status)
+      case Nil  => errorResponse("Cannot get transactions", 400)
+      case list => successResponse(sourceExtractor.transactionsToJson(list).toString(), 200)
     }
   }
 
