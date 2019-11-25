@@ -62,7 +62,7 @@ resource "aws_api_gateway_deployment" "block-explorer-api-gateway-deployment" {
 resource "aws_lambda_function" "block-explorer-api-lambda-function" {
   filename = "block-explorer-api-lambda.jar"
   function_name = "block-explorer-api"
-  handler = "org.constellation.handler.Handler::handleRequest"
+  handler = "org.constellation.blockexplorer.api.Handler::handleRequest"
   role = "${aws_iam_role.block-explorer-api-lambda-iam.arn}"
   runtime = "java8"
   timeout = 320

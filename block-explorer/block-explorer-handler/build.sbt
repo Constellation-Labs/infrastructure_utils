@@ -2,7 +2,7 @@ lazy val _version = "1.0.0"
 
 lazy val projectSettings = Seq(
   organization := "org.constellation",
-  name := "block-explorer-handler",
+  name := "block-explorer",
   version := _version,
   scalaVersion := "2.12.9"
 )
