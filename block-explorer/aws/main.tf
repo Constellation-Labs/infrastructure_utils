@@ -158,7 +158,7 @@ resource "aws_instance" "handler-block-explorer" {
     type = "ssh"
     user = "ec2-user"
     host = "${aws_eip_association.eip-block-explorer.public_ip}"
-    private_key = "${file("/home/mchrapek/Work/constellation-key/constellation-labs-block-explorer-stack.pem")}"
+    private_key = "${file("${path.module}/constellation-labs-block-explorer-stack.pem")}"
   }
 
   provisioner "remote-exec" {
@@ -197,12 +197,12 @@ resource "aws_instance" "handler-block-explorer" {
   }
 
   depends_on = [
-    "aws_iam_policy.sqs-access",
-    "aws_iam_policy.s3-access",
-    "aws_iam_role_policy_attachment.s3-attach",
-    "aws_iam_role_policy_attachment.sqs-attach",
-    "aws_iam_role.ec2-role",
-    "aws_iam_instance_profile.ec2-profile",
+    "aws_iam_policy.sqs-access-to-ec2-block-explorer-handler",
+    "aws_iam_policy.s3-access-to-ec2-block-explorer-handler",
+    "aws_iam_role_policy_attachment.s3-iam-role-block-explorer-handler",
+    "aws_iam_role_policy_attachment.sqs-iam-role-block-explorer-handler",
+    "aws_iam_role.ec2-role-block-explorer-handler",
+    "aws_iam_instance_profile.ec2-profile-block-explorer-handler",
   ]
 }
 

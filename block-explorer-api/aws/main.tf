@@ -13,26 +13,33 @@ resource "aws_api_gateway_rest_api" "block-explorer-api-gateway" {
   name = "block-explorer-api-gateway"
 }
 
-resource "aws_api_gateway_resource" "block-explorer-api-gateway-resources" {
+resource "aws_api_gateway_resource" "block-explorer-api-gateway-resources-transactions-list" {
   path_part = "transactions"
   parent_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.root_resource_id}"
+  rest_api_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.id}"
+}
+
+resource "aws_api_gateway_resource" "block-explorer-api-gateway-resources-transaction-unit" {
+  path_part = "{id}"
+  parent_id = "${aws_api_gateway_resource.block-explorer-api-gateway-resources-transactions-list.id}"
   rest_api_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.id}"
 }
 
 resource "aws_api_gateway_method" "block-explorer-api-gateway-method" {
   authorization = "NONE"
   http_method = "GET"
-  resource_id = "${aws_api_gateway_resource.block-explorer-api-gateway-resources.id}"
+  resource_id = "${aws_api_gateway_resource.block-explorer-api-gateway-resources-transaction-unit.id}"
   rest_api_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.id}"
 
   request_parameters = {
     "method.request.path.proxy" = true
+    "method.request.path.id" = true
   }
 }
 
 resource "aws_api_gateway_integration" "block-explorer-api-gateway-integration" {
   rest_api_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.id}"
-  resource_id = "${aws_api_gateway_resource.block-explorer-api-gateway-resources.id}"
+  resource_id = "${aws_api_gateway_resource.block-explorer-api-gateway-resources-transaction-unit.id}"
   http_method = "${aws_api_gateway_method.block-explorer-api-gateway-method.http_method}"
   type = "AWS_PROXY"
   integration_http_method = "POST"
@@ -65,8 +72,8 @@ resource "aws_lambda_function" "block-explorer-api-lambda-function" {
   handler = "org.constellation.blockexplorer.api.Handler::handleRequest"
   role = "${aws_iam_role.block-explorer-api-lambda-iam.arn}"
   runtime = "java8"
-  timeout = 320
-  memory_size = 512
+  timeout = 360
+  memory_size = 768
 
   vpc_config {
     security_group_ids = ["${var.lambdaSecurityGroupId}"]
@@ -80,7 +87,7 @@ resource "aws_lambda_permission" "block-explorer-api-gateway-lambda-permission" 
   function_name = "${aws_lambda_function.block-explorer-api-lambda-function.function_name}"
   principal = "apigateway.amazonaws.com"
 
-  source_arn = "arn:aws:execute-api:${var.region}:${var.accountId}:${aws_api_gateway_rest_api.block-explorer-api-gateway.id}/*/${aws_api_gateway_method.block-explorer-api-gateway-method.http_method}${aws_api_gateway_resource.block-explorer-api-gateway-resources.path}"
+  source_arn = "arn:aws:execute-api:${var.region}:${var.accountId}:${aws_api_gateway_rest_api.block-explorer-api-gateway.id}/*/${aws_api_gateway_method.block-explorer-api-gateway-method.http_method}${aws_api_gateway_resource.block-explorer-api-gateway-resources-transaction-unit.path}"
 }
 
 
