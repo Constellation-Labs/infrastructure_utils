@@ -143,6 +143,8 @@ resource "aws_instance" "handler-block-explorer" {
 
   key_name = "constellation-labs-block-explorer-stack"
 
+  iam_instance_profile = "${aws_iam_instance_profile.ec2-profile-block-explorer-handler.name}"
+
   network_interface {
     device_index = 0
     network_interface_id = "${aws_network_interface.handler-app-block-explorer.id}"
@@ -193,6 +195,15 @@ resource "aws_instance" "handler-block-explorer" {
       "sudo systemctl start block-explorer-handler.service"
     ]
   }
+
+  depends_on = [
+    "aws_iam_policy.sqs-access",
+    "aws_iam_policy.s3-access",
+    "aws_iam_role_policy_attachment.s3-attach",
+    "aws_iam_role_policy_attachment.sqs-attach",
+    "aws_iam_role.ec2-role",
+    "aws_iam_instance_profile.ec2-profile",
+  ]
 }
 
 resource "aws_security_group" "security-group-handler-block-explorer" {
@@ -311,4 +322,78 @@ CONFIG
   depends_on = [
     "aws_iam_service_linked_role.es",
   ]
+}
+
+/*
+  EC2 Policy
+*/
+resource "aws_iam_policy" "sqs-access-to-ec2-block-explorer-handler" {
+  name = "sqs-access-to-ec2-block-explorer-handler"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "sqs:*"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "s3-access-to-ec2-block-explorer-handler" {
+  name = "s3-access-to-ec2-block-explorer-handler"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role" "ec2-role-block-explorer-handler" {
+  name = "ec2-role-block-explorer-handler"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "s3-iam-role-block-explorer-handler" {
+  role = "${aws_iam_role.ec2-role-block-explorer-handler.name}"
+  policy_arn = "${aws_iam_policy.s3-access-to-ec2-block-explorer-handler.arn}"
+}
+
+resource "aws_iam_role_policy_attachment" "sqs-iam-role-block-explorer-handler" {
+  role = "${aws_iam_role.ec2-role-block-explorer-handler.name}"
+  policy_arn = "${aws_iam_policy.sqs-access-to-ec2-block-explorer-handler.arn}"
+}
+
+resource "aws_iam_instance_profile" "ec2-profile-block-explorer-handler" {
+  name = "ec2-profile-block-explorer-handler"
+  role = "${aws_iam_role.ec2-role-block-explorer-handler.name}"
 }
