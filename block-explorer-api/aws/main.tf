@@ -25,7 +25,7 @@ resource "aws_api_gateway_resource" "block-explorer-api-gateway-resources-unit" 
   rest_api_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.id}"
 }
 
-resource "aws_api_gateway_method" "block-explorer-api-gateway-method" {
+resource "aws_api_gateway_method" "block-explorer-api-gateway-method-unit" {
   authorization = "NONE"
   http_method = "GET"
   resource_id = "${aws_api_gateway_resource.block-explorer-api-gateway-resources-unit.id}"
@@ -38,10 +38,35 @@ resource "aws_api_gateway_method" "block-explorer-api-gateway-method" {
   }
 }
 
-resource "aws_api_gateway_integration" "block-explorer-api-gateway-integration" {
+resource "aws_api_gateway_method" "block-explorer-api-gateway-method-list" {
+  authorization = "NONE"
+  http_method = "GET"
+  resource_id = "${aws_api_gateway_resource.block-explorer-api-gateway-resources-list.id}"
+  rest_api_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.id}"
+
+  request_parameters = {
+    "method.request.path.proxy" = true
+    "method.request.path.resource" = true
+  }
+}
+
+resource "aws_api_gateway_integration" "block-explorer-api-gateway-integration-unit" {
   rest_api_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.id}"
   resource_id = "${aws_api_gateway_resource.block-explorer-api-gateway-resources-unit.id}"
-  http_method = "${aws_api_gateway_method.block-explorer-api-gateway-method.http_method}"
+  http_method = "${aws_api_gateway_method.block-explorer-api-gateway-method-unit.http_method}"
+  type = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri = "${aws_lambda_function.block-explorer-api-lambda-function.invoke_arn}"
+
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
+}
+
+resource "aws_api_gateway_integration" "block-explorer-api-gateway-integration-list" {
+  rest_api_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.id}"
+  resource_id = "${aws_api_gateway_resource.block-explorer-api-gateway-resources-list.id}"
+  http_method = "${aws_api_gateway_method.block-explorer-api-gateway-method-list.http_method}"
   type = "AWS_PROXY"
   integration_http_method = "POST"
   uri = "${aws_lambda_function.block-explorer-api-lambda-function.invoke_arn}"
@@ -57,7 +82,8 @@ resource "aws_api_gateway_integration" "block-explorer-api-gateway-integration" 
 */
 resource "aws_api_gateway_deployment" "block-explorer-api-gateway-deployment" {
   depends_on  = [
-    "aws_api_gateway_integration.block-explorer-api-gateway-integration"
+    "aws_api_gateway_integration.block-explorer-api-gateway-integration-list",
+    "aws_api_gateway_integration.block-explorer-api-gateway-integration-unit"
   ]
   rest_api_id = "${aws_api_gateway_rest_api.block-explorer-api-gateway.id}"
   stage_name  = "block-explorer-api-dev"
@@ -88,9 +114,8 @@ resource "aws_lambda_permission" "block-explorer-api-gateway-lambda-permission" 
   function_name = "${aws_lambda_function.block-explorer-api-lambda-function.function_name}"
   principal = "apigateway.amazonaws.com"
 
-  source_arn = "arn:aws:execute-api:${var.region}:${var.accountId}:${aws_api_gateway_rest_api.block-explorer-api-gateway.id}/*/${aws_api_gateway_method.block-explorer-api-gateway-method.http_method}${aws_api_gateway_resource.block-explorer-api-gateway-resources-unit.path}"
+  source_arn = "arn:aws:execute-api:${var.region}:${var.accountId}:${aws_api_gateway_rest_api.block-explorer-api-gateway.id}/*/*"
 }
-
 
 /*
   Permission for lambda function
