@@ -99,4 +99,4 @@ curl -XPUT "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es
   }
 }'
 
-curl -XGET "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es.amazonaws.com:80/_cat/indicies"
+curl -XGET "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es.amazonaws.com:80/_cat/indices"

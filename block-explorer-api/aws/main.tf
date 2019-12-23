@@ -5,6 +5,13 @@ provider "aws" {
   secret_key = "${var.secret-key}"
 }
 
+/*
+  Output
+*/
+output "apiGatewayUrl" {
+  value = "${aws_api_gateway_deployment.block-explorer-api-gateway-deployment.invoke_url}"
+}
+
 
 /*
   API Gateway
