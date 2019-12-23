@@ -6,6 +6,22 @@ provider "aws" {
 }
 
 /*
+  Output info for lambda
+*/
+output "lambdaVpcId" {
+  value = "${aws_vpc.vpc-block-explorer.id}"
+}
+
+output "lambdaSubnetId" {
+  value = "${aws_subnet.subnet-block-explorer.id}"
+}
+
+output "lambdaSecurityGroupId" {
+  value = "${aws_security_group.security-group-access-to-vpc.id}"
+}
+
+
+/*
   VPC Network
 */
 resource "aws_vpc" "vpc-block-explorer" {
