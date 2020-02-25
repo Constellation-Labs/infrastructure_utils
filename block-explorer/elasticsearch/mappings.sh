@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curl -XPUT "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es.amazonaws.com:80/snapshots" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west-1.es.amazonaws.com:80/snapshots" -H 'Content-Type: application/json' -d'
 {
   "mappings": {
     "dynamic": false,
@@ -18,7 +18,7 @@ curl -XPUT "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es
   }
 }'
 
-curl -XPUT "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es.amazonaws.com:80/checkpoint-blocks" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west-1.es.amazonaws.com:80/checkpoint-blocks" -H 'Content-Type: application/json' -d'
 {
   "mappings": {
     "dynamic": false,
@@ -59,7 +59,7 @@ curl -XPUT "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es
   }
 }'
 
-curl -XPUT "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es.amazonaws.com:80/transactions" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west-1.es.amazonaws.com:80/transactions" -H 'Content-Type: application/json' -d'
 {
   "mappings": {
     "dynamic": false,
@@ -99,4 +99,4 @@ curl -XPUT "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es
   }
 }'
 
-curl -XGET "http://vpc-es-block-explorer-2ubbjlfih5nnvuli64w76jbja4.us-west-1.es.amazonaws.com:80/_cat/indices"
+curl -XGET "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west-1.es.amazonaws.com:80/_cat/indices"
