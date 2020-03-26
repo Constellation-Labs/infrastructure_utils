@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west-1.es.amazonaws.com:80/snapshots" -H 'Content-Type: application/json' -d'
+curl -XPUT "$URL/snapshots" -H 'Content-Type: application/json' -d'
 {
   "mappings": {
     "dynamic": false,
@@ -11,6 +11,9 @@ curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west
       "hash": {
         "type": "keyword"
       },
+      "height": {
+        "type": "long"
+      },
       "checkpointBlocks": {
         "type": "keyword"
       }
@@ -18,7 +21,7 @@ curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west
   }
 }'
 
-curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west-1.es.amazonaws.com:80/checkpoint-blocks" -H 'Content-Type: application/json' -d'
+curl -XPUT "$URL/checkpoint-blocks" -H 'Content-Type: application/json' -d'
 {
   "mappings": {
     "dynamic": false,
@@ -59,7 +62,7 @@ curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west
   }
 }'
 
-curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west-1.es.amazonaws.com:80/transactions" -H 'Content-Type: application/json' -d'
+curl -XPUT "$URL/transactions" -H 'Content-Type: application/json' -d'
 {
   "mappings": {
     "dynamic": false,
@@ -94,9 +97,104 @@ curl -XPUT "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west
       },
       "checkpointBlockHash": {
         "type": "keyword"
+      },
+      "transactionOriginal": {
+        "properties": {
+          "edge": {
+            "properties": {
+              "observationEdge": {
+                "properties": {
+                  "parents": {
+                    "type": "nested",
+                    "properties": {
+                      "hash": {
+                        "type": "keyword"
+                      },
+                      "hashType": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "data": {
+                    "properties": {
+                      "hash": {
+                        "type": "keyword"
+                      },
+                      "hashType": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "signedObservationEdge": {
+                "properties": {
+                  "signatureBatch": {
+                    "properties": {
+                      "hash": {
+                        "type": "keyword"
+                      },
+                      "signatures": {
+                        "type": "nested",
+                        "properties": {
+                          "signature": {
+                            "type": "keyword"
+                          },
+                          "id": {
+                            "properties": {
+                              "hex": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "data": {
+                "properties": {
+                  "amount": {
+                    "type": "long"
+                  },
+                  "lastTxRef": {
+                    "properties": {
+                      "hash": {
+                        "type": "keyword"
+                      },
+                      "ordinal": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "salt": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "lastTxRef": {
+            "properties": {
+              "hash": {
+                "type": "keyword"
+              },
+              "ordinal": {
+                "type": "long"
+              }
+            }
+          },
+          "isDummy": {
+            "type": "boolean"
+          },
+          "isTest": {
+            "type": "boolean"
+          }
+        }
       }
     }
   }
 }'
 
-curl -XGET "http://vpc-cl-block-explorer-test-mkp3xvroe7nba2mmddwr3xmyn4.us-west-1.es.amazonaws.com:80/_cat/indices"
+curl -XGET "$URL/_cat/indices"
