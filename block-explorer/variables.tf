@@ -34,6 +34,11 @@ variable "es_instance-type" {
   default = "m4.large.elasticsearch"
 }
 
+variable "es_instance-count" {
+  type = number
+  default = 1
+}
+
 variable "es_disk-size" {
   type = string
   default = "200"

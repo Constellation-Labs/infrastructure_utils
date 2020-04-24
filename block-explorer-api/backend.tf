@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "constellationlabs-terraform"
-    key = "block-explorer-api"
+    bucket = "constellationlabs-tf"
+    key = "block_explorer_api"
     region = "us-west-1"
   }
 }
