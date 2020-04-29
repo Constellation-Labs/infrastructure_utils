@@ -84,7 +84,7 @@ curl -XPUT "$URL/transactions" -H 'Content-Type: application/json' -d'
       },
       "lastTransactionRef": {
         "properties": {
-          "hash": {
+          "prevHash": {
             "type": "keyword"
           },
           "ordinal": {
@@ -160,7 +160,7 @@ curl -XPUT "$URL/transactions" -H 'Content-Type: application/json' -d'
                   },
                   "lastTxRef": {
                     "properties": {
-                      "hash": {
+                      "prevHash": {
                         "type": "keyword"
                       },
                       "ordinal": {
@@ -177,7 +177,7 @@ curl -XPUT "$URL/transactions" -H 'Content-Type: application/json' -d'
           },
           "lastTxRef": {
             "properties": {
-              "hash": {
+              "prevHash": {
                 "type": "keyword"
               },
               "ordinal": {
