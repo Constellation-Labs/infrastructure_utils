@@ -107,7 +107,7 @@ curl -XPUT "$URL/transactions" -H 'Content-Type: application/json' -d'
                   "parents": {
                     "type": "nested",
                     "properties": {
-                      "hash": {
+                      "hashReference": {
                         "type": "keyword"
                       },
                       "hashType": {
@@ -117,7 +117,7 @@ curl -XPUT "$URL/transactions" -H 'Content-Type: application/json' -d'
                   },
                   "data": {
                     "properties": {
-                      "hash": {
+                      "hashReference": {
                         "type": "keyword"
                       },
                       "hashType": {
