@@ -57,6 +57,12 @@ curl -XPUT "$URL/checkpoint-blocks" -H 'Content-Type: application/json' -d'
       },
       "snapshotHash": {
         "type": "keyword"
+      },
+      "soeHash": {
+        "type": "keyword"
+      },
+      "parentSOEHashes": {
+        "type": "keyword"
       }
     }
   }
