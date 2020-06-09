@@ -76,10 +76,17 @@ resource "aws_instance" "handler-block-explorer" {
     destination = "/home/ec2-user/block-explorer-handler/block-explorer-handler.jar"
   }
 
+
+  provisioner "file" {
+    content = templatefile("templates/application.conf", { sqs = data.aws_sqs_queue.sqsQueue.url, es = aws_elasticsearch_domain.es-domain.endpoint })
+    destination = "/home/ec2-user/block-explorer-handler/application.conf"
+  }
+
   provisioner "file" {
     source = "templates/block-explorer-handler.service"
     destination = "/tmp/block-explorer-handler.service"
   }
+
 
   provisioner "remote-exec" {
     inline = [

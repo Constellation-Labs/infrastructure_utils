@@ -49,6 +49,7 @@ resource "aws_elasticsearch_domain" "es-domain" {
 
   cluster_config {
     instance_type = var.es_instance-type
+    instance_count = var.es_instance-count
   }
 
   vpc_options {
