@@ -2,8 +2,27 @@
   "mappings": {
     "dynamic": false,
     "properties": {
+      "hash": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
       "blocks": {
+        "type": "nested",
         "properties": {
+          "hash": {
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
           "parent": {
             "properties": {
               "hash": {
@@ -133,11 +152,7 @@
         "type": "text"
       },
       "ordinal": {
-        "properties": {
-          "value": {
-            "type": "long"
-          }
-        }
+        "type": "long"
       },
       "rewards": {
         "properties": {
@@ -160,6 +175,9 @@
       },
       "subHeight": {
         "type": "long"
+      },
+      "timestamp" : {
+        "type" : "date"
       }
     }
   }
