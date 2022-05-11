@@ -23,6 +23,9 @@
             },
             "type": "text"
           },
+          "height": {
+            "type": "long"
+          },
           "parent": {
             "properties": {
               "hash": {
@@ -41,6 +44,16 @@
           },
           "transactions": {
             "properties": {
+              "type": "nested",
+              "hash": {
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              },
               "amount": {
                 "type": "long"
               },
@@ -176,8 +189,8 @@
       "subHeight": {
         "type": "long"
       },
-      "timestamp" : {
-        "type" : "date"
+      "timestamp": {
+        "type": "date"
       }
     }
   }
