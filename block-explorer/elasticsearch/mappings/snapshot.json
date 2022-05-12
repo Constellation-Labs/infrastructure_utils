@@ -43,8 +43,8 @@
             }
           },
           "transactions": {
+            "type": "nested",
             "properties": {
-              "type": "nested",
               "hash": {
                 "fields": {
                   "keyword": {
@@ -96,6 +96,9 @@
                   }
                 },
                 "type": "text"
+              },
+              "transactionOriginal" : {
+                "type": "object"
               }
             }
           }
@@ -116,46 +119,10 @@
                 "type": "long"
               }
             }
-          },
-          "lastStateChannelSnapshotHashes": {
-            "type": "object"
-          },
-          "lastTxRefs": {
-            "type": "nested",
-            "properties": {
-              "address": {
-                "type": "keyword"
-              },
-              "lastTx": {
-                "properties": {
-                  "hash": {
-                    "fields": {
-                      "keyword": {
-                        "ignore_above": 256,
-                        "type": "keyword"
-                      }
-                    },
-                    "type": "text"
-                  },
-                  "ordinal": {
-                    "type": "long"
-                  }
-                }
-              }
-            }
           }
         }
       },
       "lastSnapshotHash": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "nextFacilitators": {
         "fields": {
           "keyword": {
             "ignore_above": 256,
@@ -182,9 +149,6 @@
             "type": "text"
           }
         }
-      },
-      "stateChannelSnapshots": {
-        "type": "object"
       },
       "subHeight": {
         "type": "long"
