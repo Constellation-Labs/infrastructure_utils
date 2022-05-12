@@ -1,0 +1,53 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "hash": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "snapshotHash": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "snapshotOrdinal": {
+        "type": "long"
+      },
+      "height": {
+        "type": "long"
+      },
+      "parent": {
+        "properties": {
+          "hash": {
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "height": {
+            "type": "long"
+          }
+        }
+      },
+      "transactions": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type": "date"
+      }
+    }
+  }
+}

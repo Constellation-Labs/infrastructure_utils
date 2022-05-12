@@ -1,0 +1,74 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "hash": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "snapshotHash": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "snapshotOrdinal": {
+        "type": "long"
+      },
+      "amount": {
+        "type": "long"
+      },
+      "destination": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "fee": {
+        "type": "long"
+      },
+      "parent": {
+        "properties": {
+          "hash": {
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "ordinal": {
+            "type": "long"
+          }
+        }
+      },
+      "salt": {
+        "type": "long"
+      },
+      "source": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "timestamp": {
+        "type": "date"
+      }
+    }
+  }
+}
