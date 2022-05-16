@@ -3,13 +3,7 @@
     "dynamic": false,
     "properties": {
       "hash": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
+        "type": "keyword"
       },
       "blocks": {
         "type": "keyword"
@@ -18,13 +12,7 @@
         "type": "long"
       },
       "lastSnapshotHash": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
+        "type": "keyword"
       },
       "ordinal": {
         "type": "long"
@@ -35,13 +23,7 @@
             "type": "long"
           },
           "destination": {
-            "fields": {
-              "keyword": {
-                "ignore_above": 256,
-                "type": "keyword"
-              }
-            },
-            "type": "text"
+            "type": "keyword"
           }
         }
       },

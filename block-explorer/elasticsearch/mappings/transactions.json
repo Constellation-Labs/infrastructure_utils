@@ -3,22 +3,13 @@
     "dynamic": false,
     "properties": {
       "hash": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
+        "type": "keyword"
+      },
+      "blockHash": {
+        "type": "keyword"
       },
       "snapshotHash": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
+        "type": "keyword"
       },
       "snapshotOrdinal": {
         "type": "long"
@@ -27,13 +18,7 @@
         "type": "long"
       },
       "destination": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
+        "type": "keyword"
       },
       "fee": {
         "type": "long"
@@ -41,13 +26,7 @@
       "parent": {
         "properties": {
           "hash": {
-            "fields": {
-              "keyword": {
-                "ignore_above": 256,
-                "type": "keyword"
-              }
-            },
-            "type": "text"
+            "type": "keyword"
           },
           "ordinal": {
             "type": "long"
@@ -58,13 +37,7 @@
         "type": "long"
       },
       "source": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
+        "type": "keyword"
       },
       "timestamp": {
         "type": "date"
