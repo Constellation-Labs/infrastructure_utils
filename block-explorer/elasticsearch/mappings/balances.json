@@ -3,25 +3,13 @@
     "dynamic": false,
     "properties": {
       "address": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
+        "type": "keyword"
       },
       "snapshotOrdinal": {
         "type": "long"
       },
       "snapshotHash": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
+        "type": "keyword"
       },
       "timestamp": {
         "type": "date"
