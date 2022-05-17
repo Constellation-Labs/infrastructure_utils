@@ -2,9 +2,6 @@
   "mappings": {
     "dynamic": false,
     "properties": {
-      "address": {
-        "type": "keyword"
-      },
       "snapshotOrdinal": {
         "type": "long"
       },
@@ -14,8 +11,22 @@
       "timestamp": {
         "type": "date"
       },
-      "balance": {
+      "docPart": {
         "type": "long"
+      },
+      "docTotalParts": {
+        "type": "long"
+      },
+      "balances": {
+        "type": "nested",
+        "properties": {
+          "address": {
+            "type": "keyword"
+          },
+          "balance": {
+            "type": "long"
+          }
+        }
       }
     }
   }
