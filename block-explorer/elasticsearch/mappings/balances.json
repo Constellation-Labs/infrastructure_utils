@@ -11,22 +11,11 @@
       "timestamp": {
         "type": "date"
       },
-      "docPart": {
-        "type": "long"
+      "address": {
+        "type": "keyword"
       },
-      "docTotalParts": {
+      "balance": {
         "type": "long"
-      },
-      "balances": {
-        "type": "nested",
-        "properties": {
-          "address": {
-            "type": "keyword"
-          },
-          "balance": {
-            "type": "long"
-          }
-        }
       }
     }
   }
