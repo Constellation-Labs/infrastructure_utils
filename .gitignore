@@ -5,8 +5,9 @@
 target
 project/target
 *.terraform/
-terraform.*
 *.tfvars
+*.tfstate
+*.tfstate.backup
 *.tfstate.lock.info
 block-explorer-handler*.jar
 block-explorer-api*.jar
