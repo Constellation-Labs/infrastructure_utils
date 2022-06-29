@@ -2,11 +2,26 @@ provider "aws" {
   region = var.aws_region
 }
 
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
+  }
+}
+
 data "aws_caller_identity" "current" {}
 
 data "aws_partition" "current" {}
 
 data "aws_availability_zones" "available" {}
+
+data "aws_iam_group" "authorized_group" {
+  group_name = var.authorized_user_group
+}
 
 locals {
   cluster_name = "eks-${var.env}"
@@ -76,6 +91,14 @@ module "eks" {
     }
     
   }
+
+  manage_aws_auth_configmap = true
+
+  aws_auth_users = [for user in data.aws_iam_group.authorized_group.users : {
+    userarn = user.arn
+    username = user.user_name
+    groups   = ["system:masters"]
+  }]
 
   tags = {
     Env = var.env

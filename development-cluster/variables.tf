@@ -19,3 +19,8 @@ variable "repositories" {
     }
   }
 }
+
+variable "authorized_user_group" {
+  type = string
+  default = "Admin"
+}
