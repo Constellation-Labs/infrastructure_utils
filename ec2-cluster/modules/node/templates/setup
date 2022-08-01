@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -e
+
+mkdir -p /tmp/tessellation/dag
+mkdir -p /tmp/tessellation/data/snapshot
+
+wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tessellation_version}/cl-dag-l1.jar -q -O /tmp/tessellation/cl-dag-l1.jar
+wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tessellation_version}/cl-node.jar -q -O /tmp/tessellation/cl-node.jar
+wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tessellation_version}/cl-keytool.jar -q -O /tmp/tessellation/cl-keytool.jar
+# wget https://constellationlabs-dag.s3.amazonaws.com/keys_v2/${key} -q -O /tmp/tessellation/key.p12
+wget https://constellationlabs-dag.s3.amazonaws.com/keys_v2/data.csv -q -O /tmp/tessellation/genesis.csv
+wget https://constellationlabs-dag.s3.us-west-1.amazonaws.com/${app_env}-seedlist -q -O /tmp/tessellation/${app_env}-seedlist
+
+cp /tmp/rollback /tmp/tessellation/rollback
+cp /tmp/genesis /tmp/tessellation/genesis
+cp /tmp/validator /tmp/tessellation/validator
+cp /tmp/join /tmp/tessellation/join
+cp /tmp/l1-join /tmp/tessellation/dag/join
+cp /tmp/update-seedlist /tmp/tessellation/update-seedlist
+cp /tmp/update-version /tmp/tessellation/update-version
+cp /tmp/l1-initial-validator /tmp/tessellation/dag/initial-validator
+cp /tmp/l1-validator /tmp/tessellation/dag/validator
+cp /tmp/restart /tmp/tessellation/restart
+cp /tmp/l1-restart /tmp/tessellation/dag/restart
+cp /tmp/snapshots-s3-sync /tmp/tessellation/snapshots-s3-sync
+cp /tmp/key.p12 /tmp/tessellation/key.p12
+
+sudo mv /tmp/tessellation /home/admin
+sudo chmod u+x /home/admin/tessellation/rollback
+sudo chmod u+x /home/admin/tessellation/genesis
+sudo chmod u+x /home/admin/tessellation/validator
+sudo chmod u+x /home/admin/tessellation/join
+sudo chmod u+x /home/admin/tessellation/dag/join
+sudo chmod u+x /home/admin/tessellation/restart
+sudo chmod u+x /home/admin/tessellation/dag/restart
+sudo chmod u+x /home/admin/tessellation/update-seedlist
+sudo chmod u+x /home/admin/tessellation/update-version
+sudo chmod u+x /home/admin/tessellation/dag/initial-validator
+sudo chmod u+x /home/admin/tessellation/dag/validator
+sudo chmod u+x /home/admin/tessellation/snapshots-s3-sync
+sudo ln -s /home/admin/tessellation/validator /home/admin/tessellation/start
+sudo ln -s /home/admin/tessellation/dag/validator /home/admin/tessellation/dag/start
+sudo chown -R admin:admin /home/admin/tessellation

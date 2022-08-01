@@ -13,3 +13,4 @@ block-explorer-handler*.jar
 block-explorer-api*.jar
 *.pem
 .terraform.lock.hcl
+ec2-cluster/modules/node/data/

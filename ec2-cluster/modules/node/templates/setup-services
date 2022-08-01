@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+setup_service() {
+    sudo mv /tmp/$1 /etc/systemd/system/multi-user.target.wants/$1
+    sudo chmod 774 /etc/systemd/system/multi-user.target.wants/$1
+    sudo systemctl daemon-reload
+    sudo systemctl enable $1
+}
+
+setup_service "dag.service"
+setup_service "node.service"

@@ -1,0 +1,11 @@
+[Unit]
+Description=Node service
+
+[Service]
+WorkingDirectory=/home/admin/tessellation
+User=admin
+Group=admin
+ExecStart=/home/admin/tessellation/start
+
+[Install]
+WantedBy=multi-user.target

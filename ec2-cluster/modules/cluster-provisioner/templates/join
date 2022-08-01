@@ -1,0 +1,3 @@
+#!/bin/sh
+
+${path_to_join_script} ${genesis_id} ${genesis_ip}

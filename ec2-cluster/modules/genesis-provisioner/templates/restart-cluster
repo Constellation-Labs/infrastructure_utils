@@ -1,0 +1,235 @@
+#!/usr/bin/env bash
+
+red='\033[1;31m'
+grn='\033[1;32m'
+yel='\033[1;33m'
+blu='\033[1;36m'
+pnk='\033[1;35m'
+clr='\033[0m'
+
+READLINK=`readlink $0`
+if [[ "$READLINK" == "" ]]; then DIR="$PWD"; else DIR="$(dirname $READLINK)"; fi
+
+checkHosts() {
+  if [ -z "$${HOSTS_FILE:-}" ]; then
+    echo -e "$${red}HOSTS_FILE was not set$${clr}"
+    exit 1
+  fi
+}
+
+setHosts() {
+  HOSTS_FILE=$1
+}
+
+sshGenesis() {
+  checkHosts
+  genesis_ip=`head -1 $HOSTS_FILE`
+  ssh admin@$genesis_ip -o StrictHostKeyChecking=no -n $1
+}
+
+checkNodeState() {
+  node_to_check=$1
+  port_to_check=$2
+  expected_node_state=$3
+  local actual_node_state
+
+  while [ "$expected_node_state" != "$actual_node_state" ]; do
+          actual_node_state=$(sshGenesis "curl -s http://$node_to_check:$port_to_check/cluster/info | jq '.[] | select( .ip == \"$node_to_check\" )' | jq '.state' -r")
+    echo -e "$${pnk} Current node ($node_to_check) state: $actual_node_state. Expected state: $expected_node_state $${clr}"
+    sleep 1
+  done
+}
+
+stopServices() {
+  echo -e "$${blu}Stopping node and dag services$${clr}"
+
+  while read -r ip; do
+    echo "Stopping services for: $ip"
+    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo systemctl stop dag && sudo systemctl stop node'
+  done <$HOSTS_FILE
+}
+
+downloadRollbackSnapshot() {
+  echo -e "$${blu}Downloading latest snapshot$${clr}"
+
+  sshGenesis "curl -s ${block_explorer_url}/global-snapshots/latest | jq '.data.hash' -r > /home/admin/tessellation/rollback-snapshot"
+}
+
+prepareRollbackFlow(){
+  echo -e "$${blu}Setting rollback flow for cluster$${clr}"
+
+  latest_snapshot=`sshGenesis 'head -1 /home/admin/tessellation/rollback-snapshot'`
+  path_to_latest_snapshot="/home/admin/tessellation/${snapshot_stored_path}/$latest_snapshot"
+
+  if sshGenesis "test -f $path_to_latest_snapshot" ; then
+    sshGenesis 'rm -f /home/admin/tessellation/start && ln -s /home/admin/tessellation/rollback /home/admin/tessellation/start'
+  else
+    echo -e "$${red}Cannot find file with latest snapshot: $${grn}$latest_snapshot$${clr}"
+    exit 1
+  fi
+}
+
+prepareGenesisFlow(){
+  echo -e "$${blu}Setting genesis flow for cluster$${clr}"
+
+  path_to_genesis="/home/admin/tessellation/genesis.csv"
+
+  if sshGenesis "[ -f $path_to_genesis ]" ; then
+    sshGenesis 'rm -f /home/admin/tessellation/start && ln -s /home/admin/tessellation/genesis /home/admin/tessellation/start'
+  else
+    echo -e "$${red}Cannot find $${grn}genesis.csv$${clr}"
+    exit 1
+  fi
+}
+
+prepareInitialValidator(){
+  echo -e "$${blu}Setting initial validator$${clr}"
+
+  sshGenesis 'rm -f /home/admin/tessellation/dag/start && ln -s /home/admin/tessellation/dag/initial-validator /home/admin/tessellation/dag/start'
+}
+
+restartNodeServices() {
+  echo -e "$${blu}Restarting node services$${clr}"
+
+  while read -r ip; do
+    echo "Restarting node service for: $ip"
+    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo /home/admin/tessellation/restart'
+  done <$HOSTS_FILE
+}
+
+restartDagServices(){
+  echo -e "$${blu}Restarting dag services$${clr}"
+
+  while read -r ip; do
+    echo "Restarting dag service for: $ip"
+    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo /home/admin/tessellation/dag/restart'
+  done <$HOSTS_FILE
+}
+
+joinGenesis() {
+  echo -e "$${blu}Joining L0 nodes$${clr}"
+  genesis_ip=`head -1 $HOSTS_FILE`
+
+  checkNodeState $genesis_ip ${l0_public_port} "Ready"
+
+  while read ip; do
+    if [ "$ip" == "$genesis_ip" ]; then
+      echo "Skipping genesis node"
+    else
+      echo "Joining node: $ip to $genesis_ip"
+      sleep 15
+      ssh admin@$ip -o StrictHostKeyChecking=no -n "sudo /home/admin/tessellation/join-0"
+    fi
+  done <$HOSTS_FILE
+}
+
+joinInitialValidator() {
+  echo -e "$${blu}Joining L1 nodes$${clr}"
+  initial_validator_ip=`head -1 $HOSTS_FILE`
+
+  checkNodeState $initial_validator_ip ${l1_public_port} "Ready"
+
+  while read ip; do
+    if [ "$ip" == "$initial_validator_ip" ]; then
+      echo "Skipping initial validator"
+    else
+      echo "Joining node: $ip to $initial_validator_ip"
+      ssh admin@$ip -o StrictHostKeyChecking=no -n "sudo /home/admin/tessellation/dag/join-0"
+    fi
+  done <$HOSTS_FILE
+}
+
+restart(){
+  stop $1
+  downloadRollbackSnapshot
+  startRollback $1
+}
+
+stop(){
+  setHosts $1
+  checkHosts
+  stopServices
+}
+
+startNodes(){
+  checkHosts
+  restartNodeServices
+  joinGenesis
+  prepareInitialValidator
+  restartDagServices
+  joinInitialValidator
+}
+
+startGenesis(){
+  setHosts $1
+  if sshGenesis '[ -n "`ls -A /home/admin/tessellation/${snapshot_stored_path}`" ]' ; then
+    echo -e "$${red} Directory /home/admin/tessellation/${snapshot_stored_path} is not empty$${clr}"
+    exit 1
+  fi
+  read -p "$(echo -e "$${yel}Do you want to continue starting cluster from genesis (YES/n)?$${clr} ")" choice
+    case "$choice" in
+      YES ) ;;
+      n|N ) exit 1 ;;
+      * ) exit 1;;
+  esac
+  checkHosts
+  prepareGenesisFlow
+  startNodes
+}
+
+startRollback(){
+  setHosts $1
+  checkHosts
+  prepareRollbackFlow
+  startNodes
+}
+
+downloadSnapshot(){
+  setHosts $1
+  checkHosts
+  downloadRollbackSnapshot
+}
+
+
+#################
+
+usage=$(cat <<-EOF
+Usage: $(basename $0) <command> [args]
+
+Commands:
+    restart \t\t Restart nodes with rollback flow using latest snapshot from block explorer
+    startGenesis \t Start nodes with genesis flow using provided genesis.csv file
+    startRollback \t Start nodes with rollback flow using snapshot from rollback-snapshot file
+    stop \t\t Stop node.service and dag.service on all nodes
+    downloadSnapshot \t Downloading latest snapshot from block explorer and writing it to rollback-snapshot
+
+EOF
+)
+
+if [[ $1 == "" ]]; then
+  echo -e "$usage"
+  exit 1
+fi
+
+case "$1" in
+  restart)
+    restart "$2"
+    ;;
+  startGenesis)
+    startGenesis "$2"
+    ;;
+  startRollback)
+    startRollback "$2"
+    ;;
+  stop)
+    stop "$2"
+    ;;
+  downloadSnapshot)
+    downloadSnapshot "$2"
+    ;;
+  *)
+    echo -e "$usage"
+    exit 1
+esac
+
+exit 0

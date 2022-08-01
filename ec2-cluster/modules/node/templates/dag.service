@@ -1,0 +1,11 @@
+[Unit]
+Description=Node DAG service
+
+[Service]
+WorkingDirectory=/home/admin/tessellation/dag
+User=admin
+Group=admin
+ExecStart=/home/admin/tessellation/dag/start
+
+[Install]
+WantedBy=multi-user.target
