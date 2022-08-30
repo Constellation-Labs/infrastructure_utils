@@ -1,3 +1,20 @@
+locals {
+  l0 = {
+    app_env              = var.env,
+    public_port          = var.public_port,
+    p2p_port             = var.p2p_port,
+    cli_port             = var.cli_port,
+    snapshot_stored_path = var.snapshot_stored_path
+  }
+  l1 = {
+    app_env              = var.env,
+    l0_public_port       = var.public_port,
+    public_port          = var.l1_public_port,
+    p2p_port             = var.l1_p2p_port,
+    cli_port             = var.l1_cli_port
+  }
+}
+
 resource "aws_instance" "node" {
   count = length(var.instance_keys)
 
@@ -47,84 +64,53 @@ resource "aws_instance" "node" {
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/templates/rollback", {
+    content = templatefile("${path.module}/templates/rollback", merge(local.l0, {
       public_ip            = self.public_ip,
-      app_env              = var.env,
-      public_port          = var.public_port,
-      p2p_port             = var.p2p_port,
-      cli_port             = var.cli_port,
-      snapshot_stored_path = var.snapshot_stored_path
-    })
+    }))
     destination = "/tmp/rollback"
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/templates/genesis", {
+    content = templatefile("${path.module}/templates/genesis", merge(local.l0, {
       public_ip            = self.public_ip,
-      app_env              = var.env,
-      public_port          = var.public_port,
-      p2p_port             = var.p2p_port,
-      cli_port             = var.cli_port,
-      snapshot_stored_path = var.snapshot_stored_path
-    })
+    }))
     destination = "/tmp/genesis"
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/templates/validator", {
+    content = templatefile("${path.module}/templates/validator", merge(local.l0, {
       public_ip            = self.public_ip,
-      app_env              = var.env,
-      public_port          = var.public_port,
-      p2p_port             = var.p2p_port,
-      cli_port             = var.cli_port,
-      snapshot_stored_path = var.snapshot_stored_path
-    })
+    }))
     destination = "/tmp/validator"
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/templates/l1-validator", {
+    content = templatefile("${path.module}/templates/l1-validator", merge(local.l1, {
       public_ip      = self.public_ip,
-      app_env        = var.env,
-      l0_public_port = var.public_port,
       l0_peer_id     = var.instance_keys[count.index].id
-      l1_public_port = var.l1_public_port,
-      l1_p2p_port    = var.l1_p2p_port,
-      l1_cli_port    = var.l1_cli_port
-    })
+    }))
     destination = "/tmp/l1-validator"
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/templates/l1-initial-validator", {
+    content = templatefile("${path.module}/templates/l1-initial-validator", merge(local.l1, {
       public_ip      = self.public_ip,
-      app_env        = var.env,
-      l0_public_port = var.public_port,
       l0_peer_id     = var.instance_keys[count.index].id
-      l1_public_port = var.l1_public_port,
-      l1_p2p_port    = var.l1_p2p_port,
-      l1_cli_port    = var.l1_cli_port
-    })
+    }))
     destination = "/tmp/l1-initial-validator"
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/templates/join", {
+    content = templatefile("${path.module}/templates/join", merge(local.l0, {
       public_ip = self.public_ip,
-      app_env   = var.env,
-      cli_port  = var.cli_port,
-      p2p_port  = var.p2p_port
-    })
+    }))
     destination = "/tmp/join"
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/templates/join", {
+    content = templatefile("${path.module}/templates/join", merge(local.l1, {
       public_ip = self.public_ip,
-      app_env   = var.env,
-      cli_port  = var.l1_cli_port,
-      p2p_port  = var.l1_p2p_port
-    })
+    }))
     destination = "/tmp/l1-join"
   }
 
