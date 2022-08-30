@@ -8,7 +8,6 @@ locals {
 
 module "nodes" {
   source               = "./modules/node"
-  instance_count       = var.instance_count
   cluster_id           = local.cluster_id
   env                  = var.env
   workspace            = terraform.workspace
@@ -28,15 +27,14 @@ module "nodes" {
   bucket_name          = var.bucket_name
 }
 
-module "cluster-provisioner" {
+module "cluster_provisioner" {
   source            = "./modules/cluster-provisioner"
-  provisioner_count = var.instance_count
   instance_ips      = module.nodes.instance_ips
   instance_keys     = var.instance_keys
   ssh_user          = "admin"
 }
 
-module "genesis-provisioner" {
+module "genesis_provisioner" {
   source               = "./modules/genesis-provisioner"
   instance_ips         = module.nodes.instance_ips
   genesis_ip           = module.nodes.instance_ips[0]

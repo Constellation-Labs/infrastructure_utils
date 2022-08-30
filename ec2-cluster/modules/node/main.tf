@@ -1,5 +1,5 @@
 resource "aws_instance" "node" {
-  count = var.instance_count
+  count = length(var.instance_keys)
 
   ami                         = data.aws_ami.node.id
   instance_type               = var.instance_type

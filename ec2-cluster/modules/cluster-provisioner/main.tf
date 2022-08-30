@@ -1,5 +1,5 @@
 resource "null_resource" "cluster_provisioner" {
-  count = var.provisioner_count
+  count = length(var.instance_ips)
   triggers = {
     instance_ip = var.instance_ips[count.index]
   }

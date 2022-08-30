@@ -12,7 +12,3 @@ variable "instance_keys" {
     id  = string
   }))
 }
-
-variable "provisioner_count" {
-  type = string
-}

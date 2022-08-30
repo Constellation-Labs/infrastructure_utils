@@ -13,10 +13,6 @@ variable "instance_keys" {
   }))
 }
 
-variable "instance_count" {
-  type = string
-}
-
 variable "env" {
   type = string
 }
