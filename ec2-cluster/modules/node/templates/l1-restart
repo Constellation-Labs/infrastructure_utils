@@ -5,5 +5,5 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-mv -v /home/admin/tessellation/dag/logs /home/admin/tessellation/dag/logs_$(date +"%Y-%m-%dT%H:%M:%SZ") 2>/dev/null
-systemctl restart dag
+mv -v /home/admin/tessellation/l1/logs /home/admin/tessellation/l1/logs_$(date +"%Y-%m-%dT%H:%M:%SZ") 2>/dev/null
+systemctl restart l1

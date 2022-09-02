@@ -1,0 +1,5 @@
+#!/bin/bash
+
+VERSION=$1
+
+wget https://github.com/Constellation-Labs/tessellation/releases/download/$VERSION/cl-dag-l1.jar -O cl-dag-l1.jar

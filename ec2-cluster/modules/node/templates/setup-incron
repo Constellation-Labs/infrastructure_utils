@@ -1,6 +1,11 @@
 #!/bin/sh
 
-incrontab -l > incron_bkp
-echo "/home/admin/tessellation/${snapshot_stored_path} IN_CREATE,IN_MODIFY /bin/bash /home/admin/tessellation/snapshots-s3-sync" >> incron_bkp
-incrontab incron_bkp
-rm -f incron_bkp
+echo "[Tessellation] CRON setup started..." && \
+
+incrontab -l > incron_bkp && \
+echo "/home/admin/tessellation/l0/${snapshot_stored_path} IN_CREATE,IN_MODIFY /bin/bash /home/admin/tessellation/l0/snapshots-s3-sync" >> incron_bkp && \
+incrontab incron_bkp && \
+rm -f incron_bkp && \
+
+echo "[Tessellation] CRON setup succeeded" || \
+echo "[Tessellation] CRON setup failed!"

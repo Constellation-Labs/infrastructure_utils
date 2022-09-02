@@ -52,17 +52,17 @@ stopServices() {
 downloadRollbackSnapshot() {
   echo -e "$${blu}Downloading latest snapshot$${clr}"
 
-  sshGenesis "curl -s ${block_explorer_url}/global-snapshots/latest | jq '.data.hash' -r > /home/admin/tessellation/rollback-snapshot"
+  sshGenesis "curl -s ${block_explorer_url}/global-snapshots/latest | jq '.data.hash' -r > /home/admin/tessellation/l0/rollback-snapshot"
 }
 
 prepareRollbackFlow(){
   echo -e "$${blu}Setting rollback flow for cluster$${clr}"
 
-  latest_snapshot=`sshGenesis 'head -1 /home/admin/tessellation/rollback-snapshot'`
-  path_to_latest_snapshot="/home/admin/tessellation/${snapshot_stored_path}/$latest_snapshot"
+  latest_snapshot=`sshGenesis 'head -1 /home/admin/tessellation/l0/rollback-snapshot'`
+  path_to_latest_snapshot="/home/admin/tessellation/l0/${snapshot_stored_path}/$latest_snapshot"
 
   if sshGenesis "test -f $path_to_latest_snapshot" ; then
-    sshGenesis 'rm -f /home/admin/tessellation/start && ln -s /home/admin/tessellation/rollback /home/admin/tessellation/start'
+    sshGenesis 'rm -f /home/admin/tessellation/l0/start && ln -s /home/admin/tessellation/l0/rollback /home/admin/tessellation/l0/start'
   else
     echo -e "$${red}Cannot find file with latest snapshot: $${grn}$latest_snapshot$${clr}"
     exit 1
@@ -72,10 +72,10 @@ prepareRollbackFlow(){
 prepareGenesisFlow(){
   echo -e "$${blu}Setting genesis flow for cluster$${clr}"
 
-  path_to_genesis="/home/admin/tessellation/genesis.csv"
+  path_to_genesis="/home/admin/tessellation/l0/genesis.csv"
 
   if sshGenesis "[ -f $path_to_genesis ]" ; then
-    sshGenesis 'rm -f /home/admin/tessellation/start && ln -s /home/admin/tessellation/genesis /home/admin/tessellation/start'
+    sshGenesis 'rm -f /home/admin/tessellation/l0/start && ln -s /home/admin/tessellation/l0/genesis /home/admin/tessellation/l0/start'
   else
     echo -e "$${red}Cannot find $${grn}genesis.csv$${clr}"
     exit 1
@@ -85,7 +85,7 @@ prepareGenesisFlow(){
 prepareInitialValidator(){
   echo -e "$${blu}Setting initial validator$${clr}"
 
-  sshGenesis 'rm -f /home/admin/tessellation/dag/start && ln -s /home/admin/tessellation/dag/initial-validator /home/admin/tessellation/dag/start'
+  sshGenesis 'rm -f /home/admin/tessellation/l1/start && ln -s /home/admin/tessellation/l1/initial-validator /home/admin/tessellation/l1/start'
 }
 
 restartNodeServices() {
@@ -93,7 +93,7 @@ restartNodeServices() {
 
   while read -r ip; do
     echo "Restarting node service for: $ip"
-    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo /home/admin/tessellation/restart'
+    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo /home/admin/tessellation/l0/restart'
   done <$HOSTS_FILE
 }
 
@@ -102,7 +102,7 @@ restartDagServices(){
 
   while read -r ip; do
     echo "Restarting dag service for: $ip"
-    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo /home/admin/tessellation/dag/restart'
+    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo /home/admin/tessellation/l1/restart'
   done <$HOSTS_FILE
 }
 
@@ -118,7 +118,7 @@ joinGenesis() {
     else
       echo "Joining node: $ip to $genesis_ip"
       sleep 15
-      ssh admin@$ip -o StrictHostKeyChecking=no -n "sudo /home/admin/tessellation/join-0"
+      ssh admin@$ip -o StrictHostKeyChecking=no -n "sudo /home/admin/tessellation/l0/join-0"
     fi
   done <$HOSTS_FILE
 }
@@ -134,7 +134,7 @@ joinInitialValidator() {
       echo "Skipping initial validator"
     else
       echo "Joining node: $ip to $initial_validator_ip"
-      ssh admin@$ip -o StrictHostKeyChecking=no -n "sudo /home/admin/tessellation/dag/join-0"
+      ssh admin@$ip -o StrictHostKeyChecking=no -n "sudo /home/admin/tessellation/l1/join-0"
     fi
   done <$HOSTS_FILE
 }
@@ -162,8 +162,8 @@ startNodes(){
 
 startGenesis(){
   setHosts $1
-  if sshGenesis '[ -n "`ls -A /home/admin/tessellation/${snapshot_stored_path}`" ]' ; then
-    echo -e "$${red} Directory /home/admin/tessellation/${snapshot_stored_path} is not empty$${clr}"
+  if sshGenesis '[ -n "`ls -A /home/admin/tessellation/l0/${snapshot_stored_path}`" ]' ; then
+    echo -e "$${red} Directory /home/admin/tessellation/l0/${snapshot_stored_path} is not empty$${clr}"
     exit 1
   fi
   read -p "$(echo -e "$${yel}Do you want to continue starting cluster from genesis (YES/n)?$${clr} ")" choice
@@ -200,7 +200,7 @@ Commands:
     restart \t\t Restart nodes with rollback flow using latest snapshot from block explorer
     startGenesis \t Start nodes with genesis flow using provided genesis.csv file
     startRollback \t Start nodes with rollback flow using snapshot from rollback-snapshot file
-    stop \t\t Stop node.service and dag.service on all nodes
+    stop \t\t Stop l0.service and l1.service on all nodes
     downloadSnapshot \t Downloading latest snapshot from block explorer and writing it to rollback-snapshot
 
 EOF

@@ -2,43 +2,64 @@
 
 set -e
 
-mkdir -p /tmp/tessellation/dag
-mkdir -p /tmp/tessellation/data/snapshot
+echo "[Tessellation] Node setup started..." && \
+echo "[Tessellation] Creating directories" && \
 
-wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tessellation_version}/cl-dag-l1.jar -q -O /tmp/tessellation/cl-dag-l1.jar
-wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tessellation_version}/cl-node.jar -q -O /tmp/tessellation/cl-node.jar
-wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tessellation_version}/cl-keytool.jar -q -O /tmp/tessellation/cl-keytool.jar
-# wget https://constellationlabs-dag.s3.amazonaws.com/keys_v2/${key} -q -O /tmp/tessellation/key.p12
-wget https://constellationlabs-dag.s3.amazonaws.com/keys_v2/data.csv -q -O /tmp/tessellation/genesis.csv
-wget https://constellationlabs-dag.s3.us-west-1.amazonaws.com/${app_env}-seedlist -q -O /tmp/tessellation/${app_env}-seedlist
+mkdir -p /tmp/tessellation/l1 && \
+mkdir -p /tmp/tessellation/l0 && \
+mkdir -p /tmp/tessellation/l0/data/snapshot && \
 
-cp /tmp/rollback /tmp/tessellation/rollback
-cp /tmp/genesis /tmp/tessellation/genesis
-cp /tmp/validator /tmp/tessellation/validator
-cp /tmp/join /tmp/tessellation/join
-cp /tmp/l1-join /tmp/tessellation/dag/join
-cp /tmp/update-seedlist /tmp/tessellation/update-seedlist
-cp /tmp/update-version /tmp/tessellation/update-version
-cp /tmp/l1-initial-validator /tmp/tessellation/dag/initial-validator
-cp /tmp/l1-validator /tmp/tessellation/dag/validator
-cp /tmp/restart /tmp/tessellation/restart
-cp /tmp/l1-restart /tmp/tessellation/dag/restart
-cp /tmp/snapshots-s3-sync /tmp/tessellation/snapshots-s3-sync
-cp /tmp/key.p12 /tmp/tessellation/key.p12
+echo "[Tessellation] Fetching jars, genesis and seedlist" && \
 
-sudo mv /tmp/tessellation /home/admin
-sudo chmod u+x /home/admin/tessellation/rollback
-sudo chmod u+x /home/admin/tessellation/genesis
-sudo chmod u+x /home/admin/tessellation/validator
-sudo chmod u+x /home/admin/tessellation/join
-sudo chmod u+x /home/admin/tessellation/dag/join
-sudo chmod u+x /home/admin/tessellation/restart
-sudo chmod u+x /home/admin/tessellation/dag/restart
-sudo chmod u+x /home/admin/tessellation/update-seedlist
-sudo chmod u+x /home/admin/tessellation/update-version
-sudo chmod u+x /home/admin/tessellation/dag/initial-validator
-sudo chmod u+x /home/admin/tessellation/dag/validator
-sudo chmod u+x /home/admin/tessellation/snapshots-s3-sync
-sudo ln -s /home/admin/tessellation/validator /home/admin/tessellation/start
-sudo ln -s /home/admin/tessellation/dag/validator /home/admin/tessellation/dag/start
-sudo chown -R admin:admin /home/admin/tessellation
+wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tessellation_version}/cl-dag-l1.jar -q -O /tmp/tessellation/l1/cl-dag-l1.jar && \
+wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tessellation_version}/cl-node.jar -q -O /tmp/tessellation/l0/cl-node.jar && \
+wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tessellation_version}/cl-keytool.jar -q -O /tmp/tessellation/cl-keytool.jar && \
+# wget https://constellationlabs-dag.s3.amazonaws.com/keys_v2/${key} -q -O /tmp/tessellation/key.p12 && \
+wget https://constellationlabs-dag.s3.amazonaws.com/keys_v2/data.csv -q -O /tmp/tessellation/l0/genesis.csv && \
+wget https://constellationlabs-dag.s3.us-west-1.amazonaws.com/${app_env}-seedlist -q -O /tmp/tessellation/l0/${app_env}-seedlist && \
+
+echo "[Tessellation] Setting up scripts for l0"
+
+cp /tmp/rollback /tmp/tessellation/l0/rollback && \
+cp /tmp/genesis /tmp/tessellation/l0/genesis && \
+cp /tmp/validator /tmp/tessellation/l0/validator && \
+cp /tmp/join /tmp/tessellation/l0/join && \
+cp /tmp/update-seedlist /tmp/tessellation/l0/update-seedlist && \
+cp /tmp/update-version /tmp/tessellation/l0/update-version && \
+cp /tmp/restart /tmp/tessellation/l0/restart && \
+cp /tmp/snapshots-s3-sync /tmp/tessellation/l0/snapshots-s3-sync && \
+cp /tmp/key.p12 /tmp/tessellation/l0/key.p12 && \
+
+echo "[Tessellation] Setting up scripts for l1" && \
+
+cp /tmp/l1-join /tmp/tessellation/l1/join && \
+cp /tmp/l1-update-version /tmp/tessellation/l1/update-version && \
+cp /tmp/l1-initial-validator /tmp/tessellation/l1/initial-validator && \
+cp /tmp/l1-validator /tmp/tessellation/l1/validator && \
+cp /tmp/l1-restart /tmp/tessellation/l1/restart && \
+cp /tmp/key.p12 /tmp/tessellation/l1/key.p12 && \
+
+echo "[Tessellation] Giving privileges" && \
+
+sudo mv /tmp/tessellation /home/admin && \
+
+sudo chmod u+x /home/admin/tessellation/l0/rollback && \
+sudo chmod u+x /home/admin/tessellation/l0/genesis && \
+sudo chmod u+x /home/admin/tessellation/l0/validator && \
+sudo chmod u+x /home/admin/tessellation/l0/join && \
+sudo chmod u+x /home/admin/tessellation/l0/restart && \
+sudo chmod u+x /home/admin/tessellation/l0/update-seedlist && \
+sudo chmod u+x /home/admin/tessellation/l0/update-version && \
+sudo chmod u+x /home/admin/tessellation/l0/snapshots-s3-sync && \
+sudo ln -s /home/admin/tessellation/l0/validator /home/admin/tessellation/l0/start  && \
+
+sudo chmod u+x /home/admin/tessellation/l1/join && \
+sudo chmod u+x /home/admin/tessellation/l1/restart && \
+sudo chmod u+x /home/admin/tessellation/l1/initial-validator && \
+sudo chmod u+x /home/admin/tessellation/l1/validator && \
+sudo ln -s /home/admin/tessellation/l1/validator /home/admin/tessellation/l1/start && \
+
+sudo chown -R admin:admin /home/admin/tessellation && \
+
+echo "[Tessellation] Node setup succeeded" || \
+echo "[Tessellation] Node setup failed!"

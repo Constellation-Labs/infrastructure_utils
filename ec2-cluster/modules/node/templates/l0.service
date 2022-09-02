@@ -2,10 +2,10 @@
 Description=Node service
 
 [Service]
-WorkingDirectory=/home/admin/tessellation
+WorkingDirectory=/home/admin/tessellation/l0
 User=admin
 Group=admin
-ExecStart=/home/admin/tessellation/start
+ExecStart=/home/admin/tessellation/l0/start
 
 [Install]
 WantedBy=multi-user.target
