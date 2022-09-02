@@ -10,6 +10,10 @@ clr='\033[0m'
 READLINK=`readlink $0`
 if [[ "$READLINK" == "" ]]; then DIR="$PWD"; else DIR="$(dirname $READLINK)"; fi
 
+pssh() {
+  parallel-ssh $@
+}
+
 checkHosts() {
   if [ -z "$${HOSTS_FILE:-}" ]; then
     echo -e "$${red}HOSTS_FILE was not set$${clr}"
@@ -43,10 +47,7 @@ checkNodeState() {
 stopServices() {
   echo -e "$${blu}Stopping node and dag services$${clr}"
 
-  while read -r ip; do
-    echo "Stopping services for: $ip"
-    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo systemctl stop dag && sudo systemctl stop node'
-  done <$HOSTS_FILE
+  pssh -p 10 -t 0 -l admin -h $HOSTS_FILE -O StrictHostKeyChecking=no -i 'sudo systemctl stop dag && sudo systemctl stop node'
 }
 
 downloadRollbackSnapshot() {
@@ -91,19 +92,13 @@ prepareInitialValidator(){
 restartNodeServices() {
   echo -e "$${blu}Restarting node services$${clr}"
 
-  while read -r ip; do
-    echo "Restarting node service for: $ip"
-    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo /home/admin/tessellation/l0/restart'
-  done <$HOSTS_FILE
+  pssh -p 10 -t 0 -l admin -h $HOSTS_FILE -O StrictHostKeyChecking=no -i 'sudo /home/admin/tessellation/l0/restart'
 }
 
 restartDagServices(){
   echo -e "$${blu}Restarting dag services$${clr}"
 
-  while read -r ip; do
-    echo "Restarting dag service for: $ip"
-    ssh admin@$ip -o StrictHostKeyChecking=no -n 'sudo /home/admin/tessellation/l1/restart'
-  done <$HOSTS_FILE
+  pssh -p 10 -t 0 -l admin -h $HOSTS_FILE -O StrictHostKeyChecking=no -i 'sudo /home/admin/tessellation/l1/restart'
 }
 
 joinGenesis() {
@@ -112,15 +107,9 @@ joinGenesis() {
 
   checkNodeState $genesis_ip ${l0_public_port} "Ready"
 
-  while read ip; do
-    if [ "$ip" == "$genesis_ip" ]; then
-      echo "Skipping genesis node"
-    else
-      echo "Joining node: $ip to $genesis_ip"
-      sleep 15
-      ssh admin@$ip -o StrictHostKeyChecking=no -n "sudo /home/admin/tessellation/l0/join-0"
-    fi
-  done <$HOSTS_FILE
+  local filtered_hosts=`cat $HOSTS_FILE | grep -v $genesis_ip`
+
+  pssh -p 10 -t 0 -l admin -H $filtered_hosts -O StrictHostKeyChecking=no -i 'sudo /home/admin/tessellation/l0/join-0'
 }
 
 joinInitialValidator() {
@@ -129,14 +118,9 @@ joinInitialValidator() {
 
   checkNodeState $initial_validator_ip ${l1_public_port} "Ready"
 
-  while read ip; do
-    if [ "$ip" == "$initial_validator_ip" ]; then
-      echo "Skipping initial validator"
-    else
-      echo "Joining node: $ip to $initial_validator_ip"
-      ssh admin@$ip -o StrictHostKeyChecking=no -n "sudo /home/admin/tessellation/l1/join-0"
-    fi
-  done <$HOSTS_FILE
+  local filtered_hosts=`cat $HOSTS_FILE | grep -v $initial_validator_ip`
+
+  pssh -p 10 -t 0 -l admin -H $filtered_hosts -O StrictHostKeyChecking=no -i  "sudo /home/admin/tessellation/l1/join-0"
 }
 
 restart(){
