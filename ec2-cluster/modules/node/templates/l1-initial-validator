@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export CL_KEYSTORE=../key.p12 && \
+export CL_KEYSTORE=./key.p12 && \
 export CL_PASSWORD=password && \
 export CL_KEYALIAS=keyalias && \
-java "-Xms1024M" "-Xmx3G" "-Xss256K" -cp ../cl-dag-l1.jar org.tessellation.dag.l1.Main run-initial-validator --ip ${public_ip} --public-port ${public_port} --p2p-port ${p2p_port} --cli-port ${cli_port} --l0-peer-id ${l0_peer_id} --l0-peer-host ${public_ip} --l0-peer-port ${l0_public_port} -e ${app_env} --collateral 0
+java "-Xms1024M" "-Xmx3G" "-Xss256K" -cp ./cl-dag-l1.jar org.tessellation.dag.l1.Main run-initial-validator --ip ${public_ip} --public-port ${public_port} --p2p-port ${p2p_port} --cli-port ${cli_port} --l0-peer-id ${l0_peer_id} --l0-peer-host ${public_ip} --l0-peer-port ${l0_public_port} -e ${app_env} --collateral 0

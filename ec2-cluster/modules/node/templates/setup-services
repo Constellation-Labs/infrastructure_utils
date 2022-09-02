@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 
 setup_service() {
-    sudo mv /tmp/$1 /etc/systemd/system/multi-user.target.wants/$1
-    sudo chmod 774 /etc/systemd/system/multi-user.target.wants/$1
-    sudo systemctl daemon-reload
-    sudo systemctl enable $1
+    echo "[Tessellation] Starting $1.service..." && \
+    sudo mv /tmp/$1.service /home/admin/tessellation/$1/$1.service && \
+    sudo chmod 774 /home/admin/tessellation/$1/$1.service && \
+    sudo systemctl daemon-reload && \
+    sudo systemctl link /home/admin/tessellation/$1/$1.service
+    sudo systemctl start $1.service && \
+    echo "[Tessellation] $1.service started" || \
+    echo "[Tessellation] Failed to start $1.service!"
 }
 
-setup_service "dag.service"
-setup_service "node.service"
+setup_service "l1"
+setup_service "l0"

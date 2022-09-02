@@ -120,6 +120,11 @@ resource "aws_instance" "node" {
   }
 
   provisioner "file" {
+    source      = "${path.module}/templates/l1-update-version"
+    destination = "/tmp/l1-update-version"
+  }
+
+  provisioner "file" {
     content = templatefile("${path.module}/templates/update-seedlist", {
       app_env = var.env
     })
@@ -127,13 +132,13 @@ resource "aws_instance" "node" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/templates/node.service"
-    destination = "/tmp/node.service"
+    source      = "${path.module}/templates/l0.service"
+    destination = "/tmp/l0.service"
   }
 
   provisioner "file" {
-    source      = "${path.module}/templates/dag.service"
-    destination = "/tmp/dag.service"
+    source      = "${path.module}/templates/l1.service"
+    destination = "/tmp/l1.service"
   }
 
   provisioner "file" {

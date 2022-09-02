@@ -6,6 +6,13 @@ locals {
   cluster_id = random_id.instance_id.hex
 }
 
+module "s3" {
+  source = "./modules/s3"
+  cluster_id           = local.cluster_id
+  env                  = var.env
+  workspace            = terraform.workspace
+}
+
 module "nodes" {
   source               = "./modules/node"
   cluster_id           = local.cluster_id
@@ -22,8 +29,8 @@ module "nodes" {
   l1_p2p_port          = var.l1_p2p_port
   l1_cli_port          = var.l1_cli_port
   snapshot_stored_path = var.snapshot_stored_path
-  bucket_access_key    = aws_iam_access_key.s3_access.id
-  bucket_secret_key    = aws_iam_access_key.s3_access.secret
+  bucket_access_key    = module.s3.bucket_access_key
+  bucket_secret_key    = module.s3.bucket_secret_key
   bucket_name          = var.bucket_name
 }
 

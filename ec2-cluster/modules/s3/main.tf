@@ -1,5 +1,5 @@
 resource "aws_iam_user" "s3_access" {
-  name = "s3_access"
+  name = "s3_access-${var.cluster_id}"
   path = "/system/"
 }
 
@@ -8,7 +8,7 @@ resource "aws_iam_access_key" "s3_access" {
 }
 
 resource "aws_iam_user_policy" "s3_access" {
-  name = "s3_access"
+  name = "s3_access-${var.cluster_id}"
   user = aws_iam_user.s3_access.name
 
   policy = <<EOF

@@ -2,10 +2,10 @@
 Description=Node DAG service
 
 [Service]
-WorkingDirectory=/home/admin/tessellation/dag
+WorkingDirectory=/home/admin/tessellation/l1
 User=admin
 Group=admin
-ExecStart=/home/admin/tessellation/dag/start
+ExecStart=/home/admin/tessellation/l1/start
 
 [Install]
 WantedBy=multi-user.target
