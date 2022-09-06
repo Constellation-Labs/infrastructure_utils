@@ -1,0 +1,8 @@
+[Unit]
+Description=Node service
+
+[Service]
+WorkingDirectory=/home/${user}/tessellation/l0
+User=${user}
+Group=${user}
+ExecStart=/home/${user}/tessellation/l0/start

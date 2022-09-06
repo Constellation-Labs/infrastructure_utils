@@ -1,11 +1,15 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-echo "[Tessellation] CRON setup started..." && \
+red='\033[1;31m'
+blu='\033[1;36m'
+clr='\033[0m'
+
+echo -e "$${blu}[Tessellation]$${clr} CRON setup started..." && \
 
 incrontab -l > incron_bkp && \
-echo "/home/admin/tessellation/l0/${snapshot_stored_path} IN_CREATE,IN_MODIFY /bin/bash /home/admin/tessellation/l0/snapshots-s3-sync" >> incron_bkp && \
+echo "/home/${user}/tessellation/l0/${snapshot_stored_path} IN_CREATE,IN_MODIFY /bin/bash /home/${user}/tessellation/l0/snapshots-s3-sync" >> incron_bkp && \
 incrontab incron_bkp && \
 rm -f incron_bkp && \
 
-echo "[Tessellation] CRON setup succeeded" || \
-echo "[Tessellation] CRON setup failed!"
+echo -e "$${blu}[Tessellation]$${clr} CRON setup succeeded" || \
+echo -e "$${red}[Tessellation]$${clr} CRON setup failed!"

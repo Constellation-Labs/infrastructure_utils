@@ -68,3 +68,7 @@ variable "bucket_secret_key" {
 variable "bucket_name" {
   type = string
 }
+
+variable "block_explorer_url" {
+  type = string
+}

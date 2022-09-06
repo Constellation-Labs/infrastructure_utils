@@ -1,3 +1,3 @@
 #!/bin/bash
 
-wget https://constellationlabs-dag.s3.us-west-1.amazonaws.com/${app_env}-seedlist -O /home/admin/tessellation/l0/${app_env}-seedlist
+wget https://constellationlabs-dag.s3.us-west-1.amazonaws.com/${app_env}-seedlist -O /home/${user}/tessellation/l0/${app_env}-seedlist
