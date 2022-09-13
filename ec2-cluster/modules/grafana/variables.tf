@@ -1,0 +1,32 @@
+variable "aws_region" {
+  type    = string
+  default = "us-west-1"
+}
+
+variable "env" {
+  type    = string
+  default = "dev"
+}
+
+variable "cluster_id" {
+  type = string
+}
+
+variable "public_port" {
+  type = string
+  default = "9010"
+}
+
+variable "l1_public_port" {
+  type = string
+  default = "9000"
+}
+
+variable "instance_type" {
+  type = string
+  default = "t3.xlarge"
+}
+
+variable "node_ips" {
+  type = list(string)
+}

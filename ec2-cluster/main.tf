@@ -13,6 +13,15 @@ module "s3" {
   workspace  = terraform.workspace
 }
 
+module "grafana" {
+  source = "./modules/grafana"
+  env = var.env
+  cluster_id = local.cluster_id
+  node_ips = module.nodes.instance_ips
+  public_port = var.public_port
+  l1_public_port = var.l1_public_port
+}
+
 module "nodes" {
   source               = "./modules/node"
   cluster_id           = local.cluster_id
