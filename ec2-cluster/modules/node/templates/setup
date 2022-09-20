@@ -57,6 +57,7 @@ sudo chmod u+x /home/${user}/tessellation/l1/join && \
 sudo chmod u+x /home/${user}/tessellation/l1/restart && \
 sudo chmod u+x /home/${user}/tessellation/l1/run-initial-validator && \
 sudo chmod u+x /home/${user}/tessellation/l1/run-validator && \
+sudo chmod u+x /home/${user}/tessellation/l1/l1-update-version && \
 sudo ln -s /home/${user}/tessellation/l1/run-validator /home/${user}/tessellation/l1/start && \
 
 sudo chown -R admin:admin /home/${user}/tessellation && \
