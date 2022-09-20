@@ -47,12 +47,12 @@ resource "aws_instance" "grafana" {
   }
 
   provisioner "file" {
-    source = "./templates/docker-compose.yml"
+    source = "${path.module}/templates/docker-compose.yml"
     destination = "/home/${local.ssh_user}/docker-compose.yml"
   }
 
   provisioner "file" {
-    content = templatefile("./templates/prometheus/prometheus.yaml.tftpl", {
+    content = templatefile("${path.module}/templates/prometheus/prometheus.yaml.tftpl", {
       targets = var.node_ips
       public_port = var.public_port
       l1_public_port = var.l1_public_port
@@ -61,12 +61,12 @@ resource "aws_instance" "grafana" {
   }
 
   provisioner "file" {
-    source = "./templates/grafana/dashboards"
+    source = "${path.module}/templates/grafana/dashboards"
     destination = "/home/${local.ssh_user}/grafana"
   }
 
   provisioner "file" {
-    source = "./templates/grafana/datasources"
+    source = "${path.module}/templates/grafana/datasources"
     destination = "/home/${local.ssh_user}/grafana"
   }
 
