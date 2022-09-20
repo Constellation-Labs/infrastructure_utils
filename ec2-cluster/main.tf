@@ -7,10 +7,11 @@ locals {
 }
 
 module "s3" {
-  source     = "./modules/s3"
-  cluster_id = local.cluster_id
-  env        = var.env
-  workspace  = terraform.workspace
+  source      = "./modules/s3"
+  cluster_id  = local.cluster_id
+  env         = var.env
+  workspace   = terraform.workspace
+  bucket_name = var.bucket_name
 }
 
 module "nodes" {

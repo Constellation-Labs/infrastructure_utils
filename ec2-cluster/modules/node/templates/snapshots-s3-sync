@@ -8,6 +8,6 @@ echo -e "$${blu}[Tessellation]$${clr} S3 sync setup started..." && \
 export AWS_ACCESS_KEY_ID=${bucket_access_key}  && \
 export AWS_SECRET_ACCESS_KEY=${bucket_secret_key}  && \
 
-/usr/bin/aws s3 sync /home/${user}/tessellation/l0/${snapshot_stored_path} ${bucket_name}  && \
+/usr/bin/aws s3 sync /home/${user}/tessellation/l0/${snapshot_stored_path} s3://${bucket_name}  && \
 echo -e "$${blu}[Tessellation]$${clr} S3 sync setup succeeded"  || \
 echo -e "$${red}[Tessellation]$${clr} S3 sync setup failed!"

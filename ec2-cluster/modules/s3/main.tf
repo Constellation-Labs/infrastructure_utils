@@ -27,7 +27,8 @@ resource "aws_iam_user_policy" "s3_access" {
     {
       "Action": [
         "s3:GetObject",
-        "s3:PutObject"
+        "s3:PutObject",
+        "s3:HeadObject"
       ],
       "Effect": "Allow",
       "Resource": [
