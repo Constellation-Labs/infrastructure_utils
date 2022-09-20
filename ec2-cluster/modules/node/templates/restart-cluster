@@ -92,6 +92,12 @@ downloadRollbackSnapshot() {
       let i++
     done
   fi
+
+  if sshDriver "[ ! -f $path_to_latest_snapshot ]" ; then
+    echo -e "$${yel}Snapshot not found on all nodes"
+    echo -e "$${pnk}Looking for latest snapshot in s3 bucket: ${bucket_name} {clr}" 
+    sshDriver "export AWS_ACCESS_KEY_ID=${bucket_access_key} && export AWS_SECRET_ACCESS_KEY=${bucket_secret_key} && /usr/bin/aws s3 cp s3://${bucket_name}/snapshot-streaming/$latest_snapshot $path_to_snapshots"
+  fi
 }
 
 prepareRollbackFlow(){

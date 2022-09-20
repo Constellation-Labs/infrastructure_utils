@@ -194,7 +194,10 @@ resource "aws_instance" "node" {
       l0_public_port       = var.public_port,
       l1_public_port       = var.l1_public_port,
       snapshot_stored_path = var.snapshot_stored_path,
-      block_explorer_url   = var.block_explorer_url
+      block_explorer_url   = var.block_explorer_url,
+      bucket_name          = var.bucket_name,
+      bucket_access_key    = var.bucket_access_key,
+      bucket_secret_key    = var.bucket_secret_key,
       user                 = local.ssh_user
     })
     destination = "/tmp/restart-cluster"
