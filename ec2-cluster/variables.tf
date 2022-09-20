@@ -19,7 +19,7 @@ variable "instance_type" {
 
 variable "node_disk_size" {
   type    = number
-  default = 50
+  default = 300
 }
 
 variable "tessellation_version" {
