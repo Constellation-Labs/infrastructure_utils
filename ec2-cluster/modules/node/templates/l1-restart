@@ -1,9 +1,0 @@
-#!/bin/bash
-
-if [[ $EUID -ne 0 ]]; then
-  echo "This script must be run as root"
-  exit 1
-fi
-
-mv -v /home/admin/tessellation/l1/logs /home/admin/tessellation/l1/logs_$(date +"%Y-%m-%dT%H:%M:%SZ") 2>/dev/null
-systemctl restart l1

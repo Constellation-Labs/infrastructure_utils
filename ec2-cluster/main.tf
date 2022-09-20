@@ -7,10 +7,10 @@ locals {
 }
 
 module "s3" {
-  source = "./modules/s3"
-  cluster_id           = local.cluster_id
-  env                  = var.env
-  workspace            = terraform.workspace
+  source     = "./modules/s3"
+  cluster_id = local.cluster_id
+  env        = var.env
+  workspace  = terraform.workspace
 }
 
 module "nodes" {
@@ -29,25 +29,14 @@ module "nodes" {
   l1_p2p_port          = var.l1_p2p_port
   l1_cli_port          = var.l1_cli_port
   snapshot_stored_path = var.snapshot_stored_path
+  block_explorer_url   = var.block_explorer_url
   bucket_access_key    = module.s3.bucket_access_key
   bucket_secret_key    = module.s3.bucket_secret_key
   bucket_name          = var.bucket_name
 }
 
 module "cluster_provisioner" {
-  source            = "./modules/cluster-provisioner"
-  instance_ips      = module.nodes.instance_ips
-  instance_keys     = var.instance_keys
-  ssh_user          = "admin"
-}
-
-module "genesis_provisioner" {
-  source               = "./modules/genesis-provisioner"
-  instance_ips         = module.nodes.instance_ips
-  genesis_ip           = module.nodes.instance_ips[0]
-  l0_public_port       = var.public_port
-  l1_public_port       = var.l1_public_port
-  snapshot_stored_path = var.snapshot_stored_path
-  block_explorer_url   = var.block_explorer_url
-  ssh_user             = "admin"
+  source       = "./modules/cluster-provisioner"
+  instance_ips = module.nodes.instance_ips
+  ssh_user     = "admin"
 }

@@ -14,7 +14,7 @@ variable "instance_count" {
 }
 
 variable "instance_type" {
-  type    = string
+  type = string
 }
 
 variable "node_disk_size" {

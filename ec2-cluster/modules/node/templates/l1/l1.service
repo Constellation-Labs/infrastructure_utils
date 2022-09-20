@@ -1,0 +1,8 @@
+[Unit]
+Description=Node DAG service
+
+[Service]
+WorkingDirectory=/home/${user}/tessellation/l1
+User=${user}
+Group=${user}
+ExecStart=/home/${user}/tessellation/l1/start
