@@ -19,7 +19,8 @@ scrape_configs:
           - localhost:9090
   - job_name: dynamic-targets
     http_sd_configs:
-      %{ for ip in targets ~}
+%{ for ip in targets ~}
       - url: http://${ip}:${public_port}/targets
       - url: http://${ip}:${l1_public_port}/targets
-      %{ endfor ~}
+%{ endfor ~}
+
