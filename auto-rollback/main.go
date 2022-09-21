@@ -8,7 +8,7 @@ import (
 )
 
 func rollback(scriptPath string) {
-	cmd, err := exec.Command("/bin/sh", scriptPath, "restart").Output()
+	cmd, err := exec.Command(scriptPath, "restart").Output()
 	log.Println(string(cmd))
 	if err != nil {
 		log.Fatalln("Error while executing rollback script", err)

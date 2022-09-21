@@ -12,6 +12,7 @@ echo -e "$${blu}[Tessellation]$${clr} Creating directories" && \
 mkdir -p /tmp/tessellation/l1 && \
 mkdir -p /tmp/tessellation/l0 && \
 mkdir -p /tmp/tessellation/l0/data/snapshot && \
+mkdir -p /tmp/tessellation/auto-rollback && \
 
 echo -e "$${blu}[Tessellation]$${clr} Fetching jars, genesis and seedlist" && \
 
@@ -21,9 +22,11 @@ wget https://github.com/Constellation-Labs/tessellation/releases/download/v${tes
 # wget https://constellationlabs-dag.s3.amazonaws.com/keys_v2/${key} -q -O /tmp/tessellation/key.p12 && \
 wget https://constellationlabs-dag.s3.amazonaws.com/keys_v2/data.csv -q -O /tmp/tessellation/l0/genesis.csv && \
 wget https://constellationlabs-dag.s3.us-west-1.amazonaws.com/${app_env}-seedlist -q -O /tmp/tessellation/l0/${app_env}-seedlist && \
+wget https://github.com/Constellation-Labs/infrastructure_utils/releases/latest/download/auto-rollback-linux-386 -q -O /tmp/tessellation/auto-rollback/auto-rollback && \
 
 echo -e "$${blu}[Tessellation]$${clr} Setting up scripts for cluster"
 cp /tmp/restart-cluster /tmp/tessellation
+cp /tmp/auto-rollback.service /tmp/tesselation/auto-rollback/auto-rollback.service
 
 echo -e "$${blu}[Tessellation]$${clr} Setting up scripts for l0"
 
@@ -51,6 +54,7 @@ sudo chmod u+x /home/${user}/tessellation/l0/restart && \
 sudo chmod u+x /home/${user}/tessellation/l0/update-seedlist && \
 sudo chmod u+x /home/${user}/tessellation/l0/update-version && \
 sudo chmod u+x /home/${user}/tessellation/l0/snapshots-s3-sync && \
+sudo chmod u+x /home/${user}/tessellation/auto-rollback/auto-rollback && \
 sudo ln -s /home/${user}/tessellation/l0/run-validator /home/${user}/tessellation/l0/start  && \
 
 sudo chmod u+x /home/${user}/tessellation/l1/join && \

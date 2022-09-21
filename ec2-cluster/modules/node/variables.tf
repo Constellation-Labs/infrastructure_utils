@@ -72,3 +72,9 @@ variable "bucket_name" {
 variable "block_explorer_url" {
   type = string
 }
+
+variable "auto_rollback_check_interval" {
+  type = string
+  default = "3m"
+  description = "For example 10s, 3m etc."
+}
