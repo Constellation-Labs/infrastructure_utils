@@ -189,7 +189,8 @@ resource "aws_instance" "node" {
 
   provisioner "file" {
     content = templatefile("${path.module}/templates/auto-rollback.service", {
-      block_explorer_url = var.block_explorer_url
+      user                = local.ssh_user
+      block_explorer_url  = var.block_explorer_url
       auto_rollback_check_interval = var.auto_rollback_check_interval
     })
     destination = "/tmp/auto-rollback.service"
