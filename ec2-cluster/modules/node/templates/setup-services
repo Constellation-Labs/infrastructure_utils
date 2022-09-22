@@ -7,10 +7,15 @@ clr='\033[0m'
 setup_service() {
     echo -e "$${blu}[Tessellation]$${clr} Linking $1.service..." && \
     sudo chmod 774 /home/${user}/tessellation/$1/$1.service && \
-    sudo systemctl link /home/${user}/tessellation/$1/$1.service && \
-    sudo systemctl daemon-reload || \
+    sudo systemctl link /home/${user}/tessellation/$1/$1.service || \
     echo -e "$${red}[Tessellation]$${clr} Failed to link $1.service!"
 }
 
 setup_service "l1"
 setup_service "l0"
+
+echo -e "$${blu}[Tessellation]$${clr} Linking auto-rollback.service..." && \
+sudo chmod 774 /home/${user}/tessellation/auto-rollback/auto-rollback.service && \
+sudo systemctl link /home/${user}/tessellation/auto-rollback/auto-rollback.service && \
+sudo systemctl daemon-reload || \
+echo -e "$${red}[Tessellation]$${clr} Failed to link $1.service!"

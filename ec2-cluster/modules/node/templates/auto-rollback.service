@@ -1,0 +1,8 @@
+[Unit]
+Description=Auto-Rollback service
+
+[Service]
+WorkingDirectory=/home/${user}/tessellation/
+User=${user}
+Group=${user}
+ExecStart=/home/${user}/tessellation/auto-rollback/auto-rollback -hosts /home/${user}/tessellation/cluster-hosts -script /home/${user}/tessellation/restart-cluster -interval ${auto_rollback_check_interval} -block-explorer ${block_explorer_url}
