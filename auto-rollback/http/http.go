@@ -1,4 +1,4 @@
-package main
+package http
 
 import (
 	"encoding/json"
@@ -9,12 +9,12 @@ import (
 	"strings"
 )
 
-func fetchLatestOrdinal() (uint64, error) {
+func FetchLatestOrdinal(blockExplorerUrl string) (uint64, error) {
 	var url string
-	if strings.HasSuffix(*blockExplorerUrl, "/") {
-		url = *blockExplorerUrl
+	if strings.HasSuffix(blockExplorerUrl, "/") {
+		url = blockExplorerUrl
 	} else {
-		url = *blockExplorerUrl + "/"
+		url = blockExplorerUrl + "/"
 	}
 	resp, err := http.Get(url + "global-snapshots/latest")
 	if err != nil {
@@ -29,7 +29,7 @@ func fetchLatestOrdinal() (uint64, error) {
 	return result.Data.Ordinal, nil
 }
 
-func fetchClusterInfo(ip netip.AddrPort) (ClusterInfo, error) {
+func FetchClusterInfo(ip netip.AddrPort) (ClusterInfo, error) {
 	resp, err := http.Get("http://" + ip.String() + "/cluster/info")
 	if err != nil {
 		log.Println(err)
@@ -45,9 +45,9 @@ func fetchClusterInfo(ip netip.AddrPort) (ClusterInfo, error) {
 	return result, nil
 }
 
-func fetchAreNodesReady() (bool, error) {
+func FetchAreNodesReady(ips []netip.AddrPort) (bool, error) {
 	genesis := ips[0]
-	clusterInfo, err := fetchClusterInfo(genesis)
+	clusterInfo, err := FetchClusterInfo(genesis)
 	if err != nil {
 		return false, err
 	}

@@ -1,4 +1,4 @@
-package main
+package fs
 
 import (
 	"bufio"
@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-func readHosts(hostsPath string) []netip.AddrPort {
-	file, err := os.Open(hostsPath)
+func readFile(path string) []string {
+	file, err := os.Open(path)
 	if err != nil {
 		log.Fatalln("Cannot read hosts file")
 	}
@@ -22,16 +22,22 @@ func readHosts(hostsPath string) []netip.AddrPort {
 	if scanner.Err() != nil {
 		log.Fatalln("Cannot read hosts file")
 	}
+	return lines
+}
+
+func ReadHosts(path string, port uint16) ([]netip.AddrPort, error) {
+	lines := readFile(path)
 
 	var addresses []netip.AddrPort
 	for _, ip := range lines {
 		addr, err := netip.ParseAddr(ip)
 		if err != nil {
 			log.Fatalln("Cannot parse IP address from hostfile")
+			return nil, err
 		} else {
-			addresses = append(addresses, netip.AddrPortFrom(addr, uint16(*port)))
+			addresses = append(addresses, netip.AddrPortFrom(addr, port))
 		}
 	}
 
-	return addresses
+	return addresses, nil
 }
