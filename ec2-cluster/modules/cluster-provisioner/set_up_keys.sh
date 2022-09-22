@@ -15,5 +15,8 @@ done
 
 for ip in "${instance_ips[@]}"
 do
-   ssh $user@$ip -o StrictHostKeyChecking=no -n "printf \"%s\n\" \"${public_keys[@]}\" >> /home/$user/.ssh/authorized_keys"
+   for key in "${public_keys[@]}"
+   do
+      ssh $user@$ip -o StrictHostKeyChecking=no -n "echo $key >> /home/$user/.ssh/authorized_keys"
+   done
 done

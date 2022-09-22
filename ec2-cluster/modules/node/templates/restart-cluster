@@ -28,6 +28,7 @@ setHosts() {
     if [ -f "$_default_file" ]; then
       echo "Setting up default location as hosts_file ($_default_file)"
       hosts_file=$_default_file
+      all_hosts=( `cat $hosts_file` )
       other_hosts=( `cat $hosts_file | grep -v $driver_host` )
     fi
   fi
@@ -130,10 +131,17 @@ prepareGenesisFlow(){
 }
 
 prepareInitialValidator(){
-  echo -e "$${blu}Setting initial validator$${clr}"
+  echo -e "$${blu}Setting initial validator: $driver_host $${clr}"
 
-  parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i "rm -f /home/${user}/tessellation/l1/start && ln -s /home/${user}/tessellation/l1/run-validator /home/${user}/tessellation/l1/start"
+  prepareL1Validators $${other_hosts[@]}
   sshDriver "rm -f /home/${user}/tessellation/l1/start && ln -s /home/${user}/tessellation/l1/run-initial-validator /home/${user}/tessellation/l1/start"
+}
+
+prepareL1Validators() {
+  local _hosts=($@)
+  echo -e "$${blu}Setting l1 validators: $${_hosts[@]} $${clr}"
+
+  parallel-ssh -p 10 -t 0 -l admin -H "$${_hosts[*]}" -O StrictHostKeyChecking=no -i "rm -f /home/${user}/tessellation/l1/start && ln -s /home/${user}/tessellation/l1/run-validator /home/${user}/tessellation/l1/start"
 }
 
 restartL0Services() {
@@ -142,10 +150,15 @@ restartL0Services() {
   parallel-ssh -p 10 -t 0 -l admin -h $hosts_file -O StrictHostKeyChecking=no -i "sudo /home/${user}/tessellation/l0/restart"
 }
 
-restartL1Services(){
-  echo -e "$${blu}Restarting L1 services$${clr}"
+restartAllL1Services(){
+  restartL1Services $${all_hosts[@]}
+}
 
-  parallel-ssh -p 10 -t 0 -l admin -h $hosts_file -O StrictHostKeyChecking=no -i "sudo /home/${user}/tessellation/l1/restart"
+restartL1Services(){
+  local _hosts=($@)
+  echo -e "$${blu}Restarting L1 services $${_hosts[@]} $${clr}"
+
+  parallel-ssh -p 10 -t 0 -l admin -H "$${_hosts[*]}" -O StrictHostKeyChecking=no -i "sudo /home/${user}/tessellation/l1/restart"
 }
 
 joinL0Cluster() {
@@ -156,18 +169,53 @@ joinL0Cluster() {
   parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i "sudo /home/${user}/tessellation/l0/join $driver_peer_id $driver_host"
 }
 
-joinL1Cluster() {
-  echo -e "$${blu}Joining L1 nodes$${clr}"
+joinL1Initial() {
+  echo -e "$${blu}Joining L1 nodes to initial $${clr}"
 
-  checkAllNodesState ${l1_public_port}
+  checkNodeState $driver_host ${l1_public_port}
 
-  parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i  "sudo /home/${user}/tessellation/l1/join $driver_peer_id $driver_host"
+  joinL1ChoosenNode $driver_peer_id $driver_host $${other_hosts[@]}
+}
+
+joinL1ChoosenNode() {
+  host_to_join_id=$1
+  host_to_join_ip=$2
+  shift 2
+  local _hosts=($@)
+  echo -e "$${blu}Joining L1 nodes $${_hosts[@]} $${clr}"
+
+  for _host in $${_hosts[*]}; do
+    checkNodeState $_host ${l1_public_port}
+  done
+
+  parallel-ssh -p 10 -t 0 -l admin -H "$${_hosts[*]}" -O StrictHostKeyChecking=no -i  "sudo /home/${user}/tessellation/l1/join $host_to_join_id $host_to_join_ip"
 }
 
 restart(){
   stop $1
   downloadRollbackSnapshot
   startRollback $1
+}
+
+restartL1Initial(){
+  setHosts
+  checkHosts
+  prepareInitialValidator
+  restartAllL1Services
+  joinL1Initial
+}
+
+restartL1Choosen(){
+  setHosts
+  checkHosts
+  prepareL1Validators $1
+  restartL1Services $1
+}
+
+joinL1Choosen() {
+  setHosts
+  checkHosts
+  joinL1ChoosenNode $1 $2 $3
 }
 
 stop(){
@@ -181,8 +229,8 @@ startNodes(){
   restartL0Services
   joinL0Cluster
   prepareInitialValidator
-  restartL1Services
-  joinL1Cluster
+  restartAllL1Services
+  joinL1Initial
 }
 
 startGenesis(){
@@ -223,6 +271,9 @@ Usage: $(basename $0) <command> [args]
 
 Commands:
     restart \t\t Restart nodes with rollback flow using latest snapshot from block explorer
+    restartL1Initial \t\t Restart all l1 with initial-validator
+    restartL1Choosen \t\t Restart choosen l1 with initial-validator
+    joinL1Choosen \t\t Restart choosen l1 with initial-validator
     startGenesis \t Start nodes with genesis flow using provided genesis.csv file
     startRollback \t Start nodes with rollback flow using snapshot from rollback-snapshot file
     stop \t\t Stop l0.service and l1.service on all nodes
@@ -239,6 +290,15 @@ fi
 case "$1" in
   restart)
     restart "$2"
+    ;;
+  restartL1Initial)
+    restartL1Initial 
+    ;;
+  restartL1Choosen)
+    restartL1Choosen "$2" 
+    ;;
+  joinL1Choosen)
+    joinL1Choosen "$2" "$3" "$4"
     ;;
   startGenesis)
     startGenesis "$2"

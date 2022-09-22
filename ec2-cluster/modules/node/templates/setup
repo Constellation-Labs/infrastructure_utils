@@ -26,7 +26,7 @@ wget https://github.com/Constellation-Labs/infrastructure_utils/releases/latest/
 
 echo -e "$${blu}[Tessellation]$${clr} Setting up scripts for cluster"
 cp /tmp/restart-cluster /tmp/tessellation
-cp /tmp/auto-rollback.service /tmp/tesselation/auto-rollback/auto-rollback.service
+cp /tmp/auto-rollback.service /tmp/tessellation/auto-rollback/auto-rollback.service
 
 echo -e "$${blu}[Tessellation]$${clr} Setting up scripts for l0"
 
