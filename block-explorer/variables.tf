@@ -16,17 +16,8 @@ variable "cl-vpc-cidr-block" {
   type = string
 }
 
-variable "cl-subnet-id" {
-  type = string
-}
-
-variable "cl-network-interface-id" {
-  type = string
-}
-
-variable "bucket-name" {
-  type    = string
-  default = "constellationlabs-block-explorer"
+variable "cl-subnet-ids" {
+  type = set(string)
 }
 
 variable "opensearch_instance-type" {
@@ -39,14 +30,19 @@ variable "opensearch_instance-count" {
   default = 1
 }
 
+variable "opensearch_dedicated-master-count" {
+  type    = number
+  default = 0
+}
+
+variable "opensearch_dedicated-master-type" {
+  type    = string
+  default = "r5g.large.search"
+}
+
 variable "opensearch_disk-size" {
   type    = string
   default = "200"
-}
-
-variable "handler_instance-type" {
-  type    = string
-  default = "t2.micro"
 }
 
 variable "create_iam_service_linked_role" {

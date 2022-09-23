@@ -6,8 +6,8 @@ output "vpc_cidr-block" {
   value = aws_vpc.cl_vpc.cidr_block
 }
 
-output "subnet-id" {
-  value = aws_subnet.cl_subnet.id
+output "subnet-ids" {
+  value = aws_subnet.cl_subnet.*.id
 }
 
 output "network-interface-id" {

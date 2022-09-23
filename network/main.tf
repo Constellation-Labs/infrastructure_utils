@@ -1,5 +1,6 @@
 locals {
   workspace = terraform.workspace
+  az = ["us-west-1c", "us-west-1b"]
 }
 
 resource "aws_vpc" "cl_vpc" {
@@ -13,18 +14,20 @@ resource "aws_vpc" "cl_vpc" {
 }
 
 resource "aws_subnet" "cl_subnet" {
+  count = length(local.az)
   vpc_id = aws_vpc.cl_vpc.id
-  cidr_block = "20.0.0.0/24"
+  cidr_block = "20.0.${count.index}.0/24"
+  availability_zone = local.az[count.index]
 
   tags = {
-    Name = "cl-subnet-${var.env}"
+    Name = "cl-subnet-${var.env}-${count.index}"
     Env = var.env
     Workspace = local.workspace
   }
 }
 
 resource "aws_network_interface" "cl_network_interface" {
-  subnet_id = aws_subnet.cl_subnet.id
+  subnet_id = aws_subnet.cl_subnet[0].id
   private_ips = ["20.0.0.10"]
 
   tags = {

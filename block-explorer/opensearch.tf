@@ -50,10 +50,19 @@ resource "aws_opensearch_domain" "opensearch-domain" {
   cluster_config {
     instance_type  = var.opensearch_instance-type
     instance_count = var.opensearch_instance-count
+    dedicated_master_count = var.opensearch_dedicated-master-count
+    dedicated_master_enabled = var.opensearch_dedicated-master-count > 0
+    dedicated_master_type = var.opensearch_dedicated-master-type
+    zone_awareness_enabled = true
+
+    zone_awareness_config {
+      availability_zone_count = 2
+    }
   }
 
+
   vpc_options {
-    subnet_ids         = [var.cl-subnet-id]
+    subnet_ids         = var.cl-subnet-ids
     security_group_ids = [aws_security_group.security-group-opensearch.id]
   }
 
