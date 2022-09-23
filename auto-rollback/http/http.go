@@ -3,81 +3,73 @@ package http
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/netip"
-	"strings"
 )
 
-func FetchLatestOrdinal(blockExplorerUrl string) (uint64, error) {
-	var url string
-	if strings.HasSuffix(blockExplorerUrl, "/") {
-		url = blockExplorerUrl
+func ToUrl(ip netip.AddrPort) string {
+	return "http://" + ip.String() + "/"
+}
+
+func FetchNodeHealth(ip netip.AddrPort) error {
+	url := ToUrl(ip) + "node/health"
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return err
+	} else if resp.StatusCode >= 400 {
+		return errors.New("Node is not healthy: " + ip.String())
 	} else {
-		url = blockExplorerUrl + "/"
+		return nil
 	}
-	resp, err := http.Get(url + "global-snapshots/latest")
+}
+
+func FetchLatestOrdinal(blockExplorerUrl string) (uint64, error) {
+	resp, err := http.Get(blockExplorerUrl + "global-snapshots/latest")
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+	if resp.StatusCode >= 400 {
+		return 0, errors.New(resp.Status)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
 		return 0, err
 	}
 	var result GlobalSnapshot
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		log.Println("Can not unmarshal JSON")
+	if err := json.Unmarshal(body, &result); err != nil {
+		log.Println("Can not unmarshal GlobalSnapshot")
 		return 0, err
 	}
 	return result.Data.Ordinal, nil
 }
 
 func FetchClusterInfo(ip netip.AddrPort) (ClusterInfo, error) {
-	resp, err := http.Get("http://" + ip.String() + "/cluster/info")
+	resp, err := http.Get(ToUrl(ip) + "cluster/info")
+	if err != nil {
+		log.Println("err", err)
+		return nil, err
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, errors.New(resp.Status)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
 	var result ClusterInfo
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		log.Println("Can not unmarshal JSON")
+	if err := json.Unmarshal(body, &result); err != nil {
+		log.Println("Can not unmarshal ClusterInfo")
 		return nil, err
 	}
 
 	return result, nil
-}
-
-func FetchAreNodesReady(ips []netip.AddrPort) (bool, error) {
-	genesis := ips[0]
-	clusterInfo, err := FetchClusterInfo(genesis)
-	if err != nil {
-		return false, err
-	}
-
-	var nodeInfo []NodeInfo
-
-	for _, ip := range ips {
-		for _, node := range clusterInfo {
-			if node.Ip == ip.Addr().String() {
-				nodeInfo = append(nodeInfo, node)
-			}
-		}
-	}
-
-	if len(nodeInfo) != len(ips) {
-		return false, errors.New("Couldn't find all the targets in cluster/info of genesis node")
-	}
-
-	foundReadyPeer := false
-	for _, node := range nodeInfo {
-		if node.State == "Ready" {
-			foundReadyPeer = true
-			break
-		}
-	}
-
-	if foundReadyPeer {
-		return true, nil
-	}
-
-	return false, errors.New("None of targets is in Ready state")
-
 }

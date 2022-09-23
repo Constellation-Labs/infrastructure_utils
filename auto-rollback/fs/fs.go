@@ -25,17 +25,17 @@ func readFile(path string) []string {
 	return lines
 }
 
-func ReadHosts(path string, port uint16) ([]netip.AddrPort, error) {
+func ReadHosts(path string) ([]netip.Addr, error) {
 	lines := readFile(path)
 
-	var addresses []netip.AddrPort
+	var addresses []netip.Addr
 	for _, ip := range lines {
 		addr, err := netip.ParseAddr(ip)
 		if err != nil {
 			log.Fatalln("Cannot parse IP address from hostfile")
 			return nil, err
 		} else {
-			addresses = append(addresses, netip.AddrPortFrom(addr, port))
+			addresses = append(addresses, addr)
 		}
 	}
 
