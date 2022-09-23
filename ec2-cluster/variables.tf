@@ -81,3 +81,11 @@ variable "bucket_name" {
 variable "block_explorer_url" {
   type = string
 }
+
+variable "load_balancer_l0_url" {
+  type = string
+}
+
+variable "load_balancer_l1_url" {
+  type = string
+}

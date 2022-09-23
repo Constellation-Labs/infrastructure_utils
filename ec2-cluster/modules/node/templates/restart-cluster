@@ -10,6 +10,35 @@ clr='\033[0m'
 dir=$(dirname `readlink -f $0`)
 driver_host=${public_ip}
 driver_peer_id=${peer_id}
+l0_lb=${load_balancer_l0_url}
+l1_lb=${load_balancer_l1_url}
+lb_maintenance_port=8889
+
+stopL0LB() {
+  curl -X POST http://$l0_lb:$lb_maintenance_port/settings/maintenance
+}
+
+startL0LB() {
+  curl -X DELETE http://$l0_lb:$lb_maintenance_port/settings/maintenance
+}
+
+stopL1LB() {
+  curl -X POST http://$l1_lb:$lb_maintenance_port/settings/maintenance
+}
+
+startL1LB() {
+  curl -X DELETE http://$l1_lb:$lb_maintenance_port/settings/maintenance
+}
+
+stopLB() {
+  stopL0LB
+  stopL1LB
+}
+
+startLB() {
+  startL0LB
+  startL1LB
+}
 
 checkHosts() {
   if [ -z "$${hosts_file:-}" ]; then
@@ -192,17 +221,21 @@ joinL1ChoosenNode() {
 }
 
 restart(){
+  stopLB
   stop $1
   downloadRollbackSnapshot
   startRollback $1
+  startLB
 }
 
 restartL1Initial(){
+  stopL1LB
   setHosts
   checkHosts
   prepareInitialValidator
   restartAllL1Services
   joinL1Initial
+  startL1LB
 }
 
 restartL1Choosen(){
@@ -219,6 +252,7 @@ joinL1Choosen() {
 }
 
 stop(){
+  stopLB
   setHosts $1
   checkHosts
   stopServices
@@ -263,7 +297,6 @@ downloadSnapshot(){
   downloadRollbackSnapshot
 }
 
-
 #################
 
 usage=$(cat <<-EOF
@@ -277,6 +310,8 @@ Commands:
     startGenesis \t Start nodes with genesis flow using provided genesis.csv file
     startRollback \t Start nodes with rollback flow using snapshot from rollback-snapshot file
     stop \t\t Stop l0.service and l1.service on all nodes
+    stopLB \t\t Stop L0 and L1 load balancers
+    startLB \t\t Start L0 and L1 load balancers
     downloadSnapshot \t Downloading latest snapshot from block explorer and writing it to rollback-snapshot
 
 EOF
@@ -311,6 +346,12 @@ case "$1" in
     ;;
   downloadSnapshot)
     downloadSnapshot "$2"
+    ;;
+  stopLB)
+    stopLB
+    ;;
+  startLB)
+    startLB
     ;;
   *)
     echo -e "$usage"
