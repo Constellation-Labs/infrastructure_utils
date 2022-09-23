@@ -8,11 +8,20 @@ pnk='\033[1;35m'
 clr='\033[0m'
 
 dir=$(dirname `readlink -f $0`)
-driver_host=${public_ip}
+public_ip=${public_ip}
+driver_host=public_ip
 driver_peer_id=${peer_id}
 l0_lb=${load_balancer_l0_url}
 l1_lb=${load_balancer_l1_url}
 lb_maintenance_port=8889
+block_explorer_url=${block_explorer_url}
+user=${user}
+snapshot_stored_path=${snapshot_stored_path}
+bucket_name=${bucket_name}
+bucket_access_key=${bucket_access_key}
+bucket_secret_key=${bucket_secret_key}
+l0_public_port=${l0_public_port}
+l1_public_port=${l1_public_port}
 
 stopL0LB() {
   curl -X POST http://$l0_lb:$lb_maintenance_port/settings/maintenance
@@ -96,9 +105,9 @@ stopServices() {
 downloadRollbackSnapshot() {
   echo -e "$${blu}Downloading latest snapshot$${clr}"
 
-  sshDriver "curl -s ${block_explorer_url}/global-snapshots/latest | jq '.data.hash' -r > /home/${user}/tessellation/l0/rollback-snapshot"
-  latest_snapshot=`sshDriver "head -1 /home/${user}/tessellation/l0/rollback-snapshot"`
-  path_to_snapshots="/home/${user}/tessellation/l0/${snapshot_stored_path}"
+  sshDriver "curl -s $block_explorer_url/global-snapshots/latest | jq '.data.hash' -r > /home/$user/tessellation/l0/rollback-snapshot"
+  latest_snapshot=`sshDriver "head -1 /home/$user/tessellation/l0/rollback-snapshot"`
+  path_to_snapshots="/home/$user/tessellation/l0/$snapshot_stored_path"
   path_to_latest_snapshot="$path_to_snapshots/$latest_snapshot"
   echo -e "$${blu}Latest snapshot is: $latest_snapshot $${clr}"
   if sshDriver "[ ! -f $path_to_latest_snapshot ]" ; then
@@ -110,7 +119,7 @@ downloadRollbackSnapshot() {
     while [[ $i -lt $len ]] && sshDriver "[ ! -f $path_to_latest_snapshot ]"; do
       host=$${other_hosts[$i]} 
       echo -e "$${pnk}Looking for latest snapshot in node: $host $${clr}" 
-      sshDriver "scp ${user}@$host:$path_to_latest_snapshot $path_to_snapshots"
+      sshDriver "scp $user@$host:$path_to_latest_snapshot $path_to_snapshots"
       
       snapshot_exists=sshDriver "[ -f $path_to_latest_snapshot ]"
       if sshDriver "[ -f $path_to_latest_snapshot ]" ; then 
@@ -125,20 +134,20 @@ downloadRollbackSnapshot() {
 
   if sshDriver "[ ! -f $path_to_latest_snapshot ]" ; then
     echo -e "$${yel}Snapshot not found on all nodes"
-    echo -e "$${pnk}Looking for latest snapshot in s3 bucket: ${bucket_name} {clr}" 
-    sshDriver "export AWS_ACCESS_KEY_ID=${bucket_access_key} && export AWS_SECRET_ACCESS_KEY=${bucket_secret_key} && /usr/bin/aws s3 cp s3://${bucket_name}/snapshot-streaming/$latest_snapshot $path_to_snapshots"
+    echo -e "$${pnk}Looking for latest snapshot in s3 bucket: $bucket_name {clr}"
+    sshDriver "export AWS_ACCESS_KEY_ID=$bucket_access_key && export AWS_SECRET_ACCESS_KEY=$bucket_secret_key && /usr/bin/aws s3 cp s3://$bucket_name/snapshot-streaming/$latest_snapshot $path_to_snapshots"
   fi
 }
 
 prepareRollbackFlow(){
   echo -e "$${blu}Setting rollback flow for cluster$${clr}"
 
-  latest_snapshot=`sshDriver "head -1 /home/${user}/tessellation/l0/rollback-snapshot"`
-  path_to_latest_snapshot="/home/${user}/tessellation/l0/${snapshot_stored_path}/$latest_snapshot"
+  latest_snapshot=`sshDriver "head -1 /home/$user/tessellation/l0/rollback-snapshot"`
+  path_to_latest_snapshot="/home/$user/tessellation/l0/$snapshot_stored_path/$latest_snapshot"
 
-  parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i "rm -f /home/${user}/tessellation/l0/start && ln -s /home/${user}/tessellation/l0/run-validator /home/${user}/tessellation/l0/start"
+  parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i "rm -f /home/$user/tessellation/l0/start && ln -s /home/$user/tessellation/l0/run-validator /home/$user/tessellation/l0/start"
   if sshDriver "[ -f $path_to_latest_snapshot ]" ; then
-    sshDriver 'rm -f /home/${user}/tessellation/l0/start && ln -s /home/${user}/tessellation/l0/run-rollback /home/${user}/tessellation/l0/start'
+    sshDriver 'rm -f /home/$user/tessellation/l0/start && ln -s /home/$user/tessellation/l0/run-rollback /home/$user/tessellation/l0/start'
   else
     echo -e "$${red}Cannot find file with latest snapshot: $${grn}$latest_snapshot$${clr}"
     exit 1
@@ -148,11 +157,11 @@ prepareRollbackFlow(){
 prepareGenesisFlow(){
   echo -e "$${blu}Setting genesis flow for cluster$${clr}"
 
-  path_to_genesis="/home/${user}/tessellation/l0/genesis.csv"
+  path_to_genesis="/home/$user/tessellation/l0/genesis.csv"
 
-  parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i "rm -f /home/${user}/tessellation/l0/start && ln -s /home/${user}/tessellation/l0/run-validator /home/${user}/tessellation/l0/start"
+  parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i "rm -f /home/$user/tessellation/l0/start && ln -s /home/$user/tessellation/l0/run-validator /home/$user/tessellation/l0/start"
   if sshDriver "[ -f $path_to_genesis ]" ; then
-    sshDriver "rm -f /home/${user}/tessellation/l0/start && ln -s /home/${user}/tessellation/l0/run-genesis /home/${user}/tessellation/l0/start"
+    sshDriver "rm -f /home/$user/tessellation/l0/start && ln -s /home/$user/tessellation/l0/run-genesis /home/$user/tessellation/l0/start"
   else
     echo -e "$${red}Cannot find $${grn}genesis.csv$${clr}"
     exit 1
@@ -163,20 +172,20 @@ prepareInitialValidator(){
   echo -e "$${blu}Setting initial validator: $driver_host $${clr}"
 
   prepareL1Validators $${other_hosts[@]}
-  sshDriver "rm -f /home/${user}/tessellation/l1/start && ln -s /home/${user}/tessellation/l1/run-initial-validator /home/${user}/tessellation/l1/start"
+  sshDriver "rm -f /home/$user/tessellation/l1/start && ln -s /home/$user/tessellation/l1/run-initial-validator /home/$user/tessellation/l1/start"
 }
 
 prepareL1Validators() {
   local _hosts=($@)
   echo -e "$${blu}Setting l1 validators: $${_hosts[@]} $${clr}"
 
-  parallel-ssh -p 10 -t 0 -l admin -H "$${_hosts[*]}" -O StrictHostKeyChecking=no -i "rm -f /home/${user}/tessellation/l1/start && ln -s /home/${user}/tessellation/l1/run-validator /home/${user}/tessellation/l1/start"
+  parallel-ssh -p 10 -t 0 -l admin -H "$${_hosts[*]}" -O StrictHostKeyChecking=no -i "rm -f /home/$user/tessellation/l1/start && ln -s /home/$user/tessellation/l1/run-validator /home/$user/tessellation/l1/start"
 }
 
 restartL0Services() {
   echo -e "$${blu}Restarting L0 services$${clr}"
 
-  parallel-ssh -p 10 -t 0 -l admin -h $hosts_file -O StrictHostKeyChecking=no -i "sudo /home/${user}/tessellation/l0/restart"
+  parallel-ssh -p 10 -t 0 -l admin -h $hosts_file -O StrictHostKeyChecking=no -i "sudo /home/$user/tessellation/l0/restart"
 }
 
 restartAllL1Services(){
@@ -187,21 +196,21 @@ restartL1Services(){
   local _hosts=($@)
   echo -e "$${blu}Restarting L1 services $${_hosts[@]} $${clr}"
 
-  parallel-ssh -p 10 -t 0 -l admin -H "$${_hosts[*]}" -O StrictHostKeyChecking=no -i "sudo /home/${user}/tessellation/l1/restart"
+  parallel-ssh -p 10 -t 0 -l admin -H "$${_hosts[*]}" -O StrictHostKeyChecking=no -i "sudo /home/$user/tessellation/l1/restart"
 }
 
 joinL0Cluster() {
   echo -e "$${blu}Joining L0 nodes$${clr}"
 
-  checkAllNodesState ${l0_public_port}
+  checkAllNodesState $l0_public_port
 
-  parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i "sudo /home/${user}/tessellation/l0/join $driver_peer_id $driver_host"
+  parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i "sudo /home/$user/tessellation/l0/join $driver_peer_id $driver_host"
 }
 
 joinL1Initial() {
   echo -e "$${blu}Joining L1 nodes to initial $${clr}"
 
-  checkNodeState $driver_host ${l1_public_port}
+  checkNodeState $driver_host $l1_public_port
 
   joinL1ChoosenNode $driver_peer_id $driver_host $${other_hosts[@]}
 }
@@ -214,10 +223,10 @@ joinL1ChoosenNode() {
   echo -e "$${blu}Joining L1 nodes $${_hosts[@]} $${clr}"
 
   for _host in $${_hosts[*]}; do
-    checkNodeState $_host ${l1_public_port}
+    checkNodeState $_host $l1_public_port
   done
 
-  parallel-ssh -p 10 -t 0 -l admin -H "$${_hosts[*]}" -O StrictHostKeyChecking=no -i  "sudo /home/${user}/tessellation/l1/join $host_to_join_id $host_to_join_ip"
+  parallel-ssh -p 10 -t 0 -l admin -H "$${_hosts[*]}" -O StrictHostKeyChecking=no -i  "sudo /home/$user/tessellation/l1/join $host_to_join_id $host_to_join_ip"
 }
 
 restart(){
@@ -269,8 +278,8 @@ startNodes(){
 
 startGenesis(){
   setHosts $1
-  if sshDriver '[ -n "`ls -A /home/${user}/tessellation/l0/${snapshot_stored_path}`" ]' ; then
-    echo -e "$${red} Directory /home/${user}/tessellation/l0/${snapshot_stored_path} is not empty$${clr}"
+  if sshDriver "[ -n \"\`ls -A /home/$user/tessellation/l0/$snapshot_stored_path\`\" ]" ; then
+    echo -e "$${red} Directory /home/$user/tessellation/l0/$snapshot_stored_path is not empty$${clr}"
     exit 1
   fi
   read -p "$(echo -e "$${yel}Do you want to continue starting cluster from genesis (YES/n)?$${clr} ")" choice
