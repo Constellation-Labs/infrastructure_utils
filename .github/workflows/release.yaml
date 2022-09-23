@@ -35,6 +35,7 @@ jobs:
           echo "GOOS=$GOOS" >> $GITHUB_ENV
           echo "GOARCH=$GOARCH" >> $GITHUB_ENV
       - name: Build
+        working-directory: auto-rollback
         run: |
           go build -o "$BINARY_NAME" -v
       - name: Release
