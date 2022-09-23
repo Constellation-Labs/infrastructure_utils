@@ -35,12 +35,13 @@ jobs:
           echo "GOOS=$GOOS" >> $GITHUB_ENV
           echo "GOARCH=$GOARCH" >> $GITHUB_ENV
       - name: Build
+        working-directory: auto-rollback
         run: |
           go build -o "$BINARY_NAME" -v
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
-          files: ${{env.BINARY_NAME}}
+          files: auto-rollback/${{env.BINARY_NAME}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
