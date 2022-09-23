@@ -78,3 +78,11 @@ variable "auto_rollback_check_interval" {
   default = "3m"
   description = "For example 10s, 3m etc."
 }
+
+variable "load_balancer_l0_url" {
+  type = string
+}
+
+variable "load_balancer_l1_url" {
+  type = string
+}

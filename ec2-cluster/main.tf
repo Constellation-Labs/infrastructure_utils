@@ -43,6 +43,8 @@ module "nodes" {
   bucket_access_key    = module.s3.bucket_access_key
   bucket_secret_key    = module.s3.bucket_secret_key
   bucket_name          = var.bucket_name
+  load_balancer_l0_url = var.load_balancer_l0_url
+  load_balancer_l1_url = var.load_balancer_l1_url
 }
 
 module "cluster_provisioner" {

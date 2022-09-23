@@ -207,7 +207,9 @@ resource "aws_instance" "node" {
       bucket_name          = var.bucket_name,
       bucket_access_key    = var.bucket_access_key,
       bucket_secret_key    = var.bucket_secret_key,
-      user                 = local.ssh_user
+      user                 = local.ssh_user,
+      load_balancer_l0_url = var.load_balancer_l0_url,
+      load_balancer_l1_url = var.load_balancer_l1_url
     })
     destination = "/tmp/restart-cluster"
   }
