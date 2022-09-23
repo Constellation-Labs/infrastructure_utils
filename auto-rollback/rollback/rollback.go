@@ -50,7 +50,7 @@ func toTargets(nodes []netip.AddrPort) string {
 }
 
 func Restart(scriptPath string, hostsPath string) {
-	runWithStdout(exec.Command(scriptPath, "restart", hostsPath))
+	runWithStdout(exec.Command(scriptPath, "restart"))
 }
 
 func RestartL1Initial(scriptPath string) {
