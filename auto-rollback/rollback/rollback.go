@@ -4,8 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"net/netip"
 	"os/exec"
+	"strings"
 )
+
+type JoinTarget struct {
+	Id string
+	Ip netip.Addr
+}
 
 func runWithStdout(cmd *exec.Cmd) {
 	cmdReader, err := cmd.StdoutPipe()
@@ -34,6 +41,26 @@ func runWithStdout(cmd *exec.Cmd) {
 	}
 }
 
-func RestartL0(scriptPath string) {
-	runWithStdout(exec.Command(scriptPath, "restart"))
+func toTargets(nodes []netip.AddrPort) string {
+	var targets []string
+	for _, node := range nodes {
+		targets = append(targets, node.Addr().String())
+	}
+	return "\"" + strings.Join(targets, " ") + "\""
+}
+
+func Restart(scriptPath string, hostsPath string) {
+	runWithStdout(exec.Command(scriptPath, "restart", hostsPath))
+}
+
+func RestartL1Initial(scriptPath string) {
+	runWithStdout(exec.Command(scriptPath, "restartL1Initial"))
+}
+
+func RestartL1Choosen(scriptPath string, nodes []netip.AddrPort) {
+	runWithStdout(exec.Command(scriptPath, "restartL1Choosen", toTargets(nodes)))
+}
+
+func JoinL1Choosen(scriptPath string, nodes []netip.AddrPort, toNode JoinTarget) {
+	runWithStdout(exec.Command(scriptPath, "joinL1Choosen", toNode.Ip.String(), toNode.Id, toTargets(nodes)))
 }

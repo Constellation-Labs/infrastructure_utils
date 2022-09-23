@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-var PrevOrdinal = uint64(0)
 var RollbackInProgress = false
 
 func main() {
@@ -20,7 +19,12 @@ func main() {
 	exit := make(chan string)
 	ticker := time.NewTicker(cfg.Interval)
 
-	go periodic.CheckL0(ticker, &RollbackInProgress, &PrevOrdinal, cfg)
+	go catchError(func() {
+		periodic.CheckL0(ticker, &RollbackInProgress, cfg)
+	})
+	go catchError(func() {
+		periodic.CheckL1(ticker, &RollbackInProgress, cfg)
+	})
 
 	for {
 		select {
@@ -28,4 +32,12 @@ func main() {
 			os.Exit(0)
 		}
 	}
+}
+
+func catchError(f func()) {
+	defer func() {
+		recover()
+	}()
+
+	f()
 }
