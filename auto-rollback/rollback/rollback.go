@@ -62,5 +62,5 @@ func RestartL1Choosen(scriptPath string, nodes []netip.AddrPort) {
 }
 
 func JoinL1Choosen(scriptPath string, nodes []netip.AddrPort, toNode JoinTarget) {
-	runWithStdout(exec.Command(scriptPath, "joinL1Choosen", toNode.Ip.String(), toNode.Id, toTargets(nodes)))
+	runWithStdout(exec.Command(scriptPath, "joinL1Choosen", toNode.Id, toNode.Ip.String(), toTargets(nodes)))
 }
