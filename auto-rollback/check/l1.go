@@ -1,4 +1,4 @@
-package periodic
+package check
 
 import (
 	"log"
@@ -8,11 +8,37 @@ import (
 	"tessellation/rollback"
 )
 
-func CheckL1(config config.Config) {
+type L1Checker struct {
+	IsCheckInProgress bool
+	IsFirstRun        bool
+	config            config.Config
+}
+
+func (c *L1Checker) Init(config config.Config) L1Checker {
+	c.IsCheckInProgress = false
+	c.IsFirstRun = true
+	c.config = config
+	return *c
+}
+
+func (c *L1Checker) PrepareForNextRun() L1Checker {
+	c.IsFirstRun = false
+	return *c
+}
+
+func (c *L1Checker) Check() {
+	defer func() {
+		if r := recover(); r != nil {
+			c.IsCheckInProgress = false
+			log.Println("Recovered from:", r)
+		}
+	}()
+
+	c.IsCheckInProgress = true
 
 	var nodes []netip.AddrPort
-	for _, addr := range config.Ips {
-		addrPort := netip.AddrPortFrom(addr, config.L1Port)
+	for _, addr := range c.config.Ips {
+		addrPort := netip.AddrPortFrom(addr, c.config.L1Port)
 		nodes = append(nodes, addrPort)
 	}
 
@@ -51,11 +77,12 @@ func CheckL1(config config.Config) {
 			}
 		}
 
-		rollback.RestartL1Choosen(config.RollbackScriptPath, down)
-		rollback.JoinL1Choosen(config.RollbackScriptPath, down, rejoinTarget)
+		rollback.RestartL1Choosen(c.config.RollbackScriptPath, down)
+		rollback.JoinL1Choosen(c.config.RollbackScriptPath, down, rejoinTarget)
 	} else {
 		log.Println("[L1] All the peers are down:", down, "-> Restarting L1 cluster.")
-		rollback.RestartL1Initial(config.RollbackScriptPath)
+		rollback.RestartL1Initial(c.config.RollbackScriptPath)
 	}
 
+	c.IsCheckInProgress = true
 }

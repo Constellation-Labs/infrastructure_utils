@@ -3,15 +3,10 @@ package main
 import (
 	"log"
 	"os"
+	"tessellation/check"
 	"tessellation/config"
-	"tessellation/periodic"
 	"time"
 )
-
-var L0FirstRun = true
-var L0DidRollback = false
-var L0CheckInProgress = false
-var L1CheckInProgress = false
 
 func main() {
 	log.Println("Auto-Rollback")
@@ -22,32 +17,28 @@ func main() {
 	exit := make(chan string)
 	ticker := time.NewTicker(cfg.Interval)
 
-	for range ticker.C {
-		catchError(func() {
-			if L0CheckInProgress {
-				log.Println("Skipping L0 Check because another one is already in progress.")
-			} else {
-				L0CheckInProgress = true
-				L0DidRollback = periodic.CheckL0(cfg)
-				L0CheckInProgress = false
-			}
-		})
-		catchError(func() {
-			if L0FirstRun {
-				log.Println("Skipping L1 Check due to the first run.")
-			} else if L0DidRollback {
-				log.Println("Skipping L1 Check because L0 did a rollback.")
-			} else if L1CheckInProgress {
-				log.Println("Skipping L1 Check because another one is already in progress.")
-			} else {
-				L1CheckInProgress = true
-				periodic.CheckL1(cfg)
-				L1CheckInProgress = false
-			}
-		})
+	l0 := new(check.L0Checker).Init(cfg)
+	l1 := new(check.L1Checker).Init(cfg)
 
-		L0FirstRun = false
-		L0DidRollback = false
+	for range ticker.C {
+		if l0.IsCheckInProgress {
+			log.Println("[L0] Skipping check because another one is already in progress.")
+		} else {
+			l0.Check()
+		}
+
+		if l1.IsFirstRun {
+			log.Println("[L1] Skipping first run.")
+		} else if l0.DidRollback {
+			log.Println("[L1] Skipping check because L0 did a rollback.")
+		} else if l1.IsCheckInProgress {
+			log.Println("[L1] Skipping check because another one is already in progress.")
+		} else {
+			l1.Check()
+		}
+
+		l1.PrepareForNextRun()
+		l0.PrepareForNextRun()
 	}
 
 	for {
@@ -56,15 +47,4 @@ func main() {
 			os.Exit(0)
 		}
 	}
-}
-
-func catchError(f func()) {
-	defer func() {
-		recover()
-		L0DidRollback = false
-		L0CheckInProgress = false
-		L1CheckInProgress = false
-	}()
-
-	f()
 }
