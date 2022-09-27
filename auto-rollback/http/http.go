@@ -3,7 +3,7 @@ package http
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/netip"
@@ -35,7 +35,7 @@ func FetchLatestOrdinal(blockExplorerUrl string) (uint64, error) {
 	if resp.StatusCode >= 400 {
 		return 0, errors.New(resp.Status)
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -59,7 +59,7 @@ func FetchClusterInfo(ip netip.AddrPort) (ClusterInfo, error) {
 		return nil, errors.New(resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
 		return nil, err
