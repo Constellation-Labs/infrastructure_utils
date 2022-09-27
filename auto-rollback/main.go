@@ -8,7 +8,9 @@ import (
 	"time"
 )
 
-var RollbackInProgress = false
+var DidRollback = false
+var L0CheckInProgress = false
+var L1CheckInProgress = false
 
 func main() {
 	log.Println("Auto-Rollback")
@@ -19,12 +21,30 @@ func main() {
 	exit := make(chan string)
 	ticker := time.NewTicker(cfg.Interval)
 
-	go catchError(func() {
-		periodic.CheckL0(ticker, &RollbackInProgress, cfg)
-	})
-	go catchError(func() {
-		periodic.CheckL1(ticker, &RollbackInProgress, cfg)
-	})
+	for range ticker.C {
+		catchError(func() {
+			if L0CheckInProgress {
+				log.Println("Skipping L0 Check because another one is already in progress.")
+			} else {
+				L0CheckInProgress = true
+				DidRollback = periodic.CheckL0(cfg)
+				L0CheckInProgress = false
+			}
+		})
+		catchError(func() {
+			if DidRollback {
+				log.Println("Skipping L1 Check because L0 did a rollback.")
+			} else if L1CheckInProgress {
+				log.Println("Skipping L1 Check because another one is already in progress.")
+			} else {
+				L1CheckInProgress = true
+				periodic.CheckL1(cfg)
+				L1CheckInProgress = false
+			}
+		})
+
+		DidRollback = false
+	}
 
 	for {
 		select {
@@ -37,6 +57,9 @@ func main() {
 func catchError(f func()) {
 	defer func() {
 		recover()
+		DidRollback = false
+		L0CheckInProgress = false
+		L1CheckInProgress = false
 	}()
 
 	f()
