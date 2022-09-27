@@ -8,7 +8,8 @@ import (
 	"time"
 )
 
-var DidRollback = false
+var L0FirstRun = true
+var L0DidRollback = false
 var L0CheckInProgress = false
 var L1CheckInProgress = false
 
@@ -27,12 +28,14 @@ func main() {
 				log.Println("Skipping L0 Check because another one is already in progress.")
 			} else {
 				L0CheckInProgress = true
-				DidRollback = periodic.CheckL0(cfg)
+				L0DidRollback = periodic.CheckL0(cfg)
 				L0CheckInProgress = false
 			}
 		})
 		catchError(func() {
-			if DidRollback {
+			if L0FirstRun {
+				log.Println("Skipping L1 Check due to the first run.")
+			} else if L0DidRollback {
 				log.Println("Skipping L1 Check because L0 did a rollback.")
 			} else if L1CheckInProgress {
 				log.Println("Skipping L1 Check because another one is already in progress.")
@@ -43,7 +46,8 @@ func main() {
 			}
 		})
 
-		DidRollback = false
+		L0FirstRun = false
+		L0DidRollback = false
 	}
 
 	for {
@@ -57,7 +61,7 @@ func main() {
 func catchError(f func()) {
 	defer func() {
 		recover()
-		DidRollback = false
+		L0DidRollback = false
 		L0CheckInProgress = false
 		L1CheckInProgress = false
 	}()
