@@ -46,10 +46,10 @@ func toTargets(nodes []netip.AddrPort) string {
 	for _, node := range nodes {
 		targets = append(targets, node.Addr().String())
 	}
-	return "\"" + strings.Join(targets, " ") + "\""
+	return strings.Join(targets, " ")
 }
 
-func Restart(scriptPath string, hostsPath string) {
+func Restart(scriptPath string) {
 	runWithStdout(exec.Command(scriptPath, "restart"))
 }
 
