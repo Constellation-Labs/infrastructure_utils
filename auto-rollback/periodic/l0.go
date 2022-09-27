@@ -30,7 +30,7 @@ func CheckL0(config config.Config) bool {
 		return false
 	} else {
 		log.Println("[L0] Rollback needed:", ordinal, "<=", prevOrdinal)
-		rollback.Restart(config.RollbackScriptPath, config.HostsPath)
+		rollback.Restart(config.RollbackScriptPath)
 
 		time.Sleep(time.Second * 10) // TODO: Remove?
 
