@@ -147,7 +147,7 @@ prepareRollbackFlow(){
 
   parallel-ssh -p 10 -t 0 -l admin -H "$${other_hosts[*]}" -O StrictHostKeyChecking=no -i "rm -f /home/$user/tessellation/l0/start && ln -s /home/$user/tessellation/l0/run-validator /home/$user/tessellation/l0/start"
   if sshDriver "[ -f $path_to_latest_snapshot ]" ; then
-    sshDriver 'rm -f /home/$user/tessellation/l0/start && ln -s /home/$user/tessellation/l0/run-rollback /home/$user/tessellation/l0/start'
+    sshDriver "rm -f /home/$user/tessellation/l0/start && ln -s /home/$user/tessellation/l0/run-rollback /home/$user/tessellation/l0/start"
   else
     echo -e "$${red}Cannot find file with latest snapshot: $${grn}$latest_snapshot$${clr}"
     exit 1
