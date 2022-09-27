@@ -9,7 +9,7 @@ clr='\033[0m'
 
 dir=$(dirname `readlink -f $0`)
 public_ip=${public_ip}
-driver_host=public_ip
+driver_host=$public_ip
 driver_peer_id=${peer_id}
 l0_lb=${load_balancer_l0_url}
 l1_lb=${load_balancer_l1_url}
