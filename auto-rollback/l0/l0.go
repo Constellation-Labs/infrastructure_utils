@@ -1,9 +1,8 @@
-package check
+package l0
 
 import (
 	"log"
 	"net/netip"
-	"tessellation/config"
 	"tessellation/http"
 	"tessellation/rollback"
 	"time"
@@ -36,44 +35,61 @@ func verifyNodeStates(ips []netip.AddrPort, clusterInfo http.ClusterInfo) *NodeC
 	}
 }
 
-type L0Checker struct {
-	DidRollback       bool
-	IsCheckInProgress bool
+type Checker interface {
+	Check()
+	DidRollback() bool
+}
+
+type l0Checker struct {
+	didRollback       bool
+	isCheckInProgress bool
 	PrevOrdinal       uint64
-	config            config.Config
+	ips               []netip.Addr
+	port              uint16
+	blockExplorerUrl  string
+	rollbackService   rollback.Service
 }
 
-func (c *L0Checker) Init(config config.Config) L0Checker {
-	c.DidRollback = false
-	c.IsCheckInProgress = false
-	c.PrevOrdinal = uint64(0)
-	c.config = config
-	return *c
+func GetService(rollbackService rollback.Service, port uint16, ips []netip.Addr, blockExplorerUrl string) Checker {
+	return &l0Checker{
+		didRollback:       false,
+		isCheckInProgress: false,
+		PrevOrdinal:       uint64(0),
+		port:              port,
+		ips:               ips,
+		blockExplorerUrl:  blockExplorerUrl,
+		rollbackService:   rollbackService,
+	}
 }
 
-func (c *L0Checker) PrepareForNextRun() L0Checker {
-	c.DidRollback = false
-	return *c
+func (c *l0Checker) DidRollback() bool {
+	return c.didRollback
 }
 
-func (c *L0Checker) Check() {
+func (c *l0Checker) Check() {
 	defer func() {
 		if r := recover(); r != nil {
-			c.DidRollback = false
-			c.IsCheckInProgress = false
+			c.didRollback = false
+			c.isCheckInProgress = false
 			log.Println("Recovered from:", r)
 		}
 	}()
 
-	c.IsCheckInProgress = true
+	if c.isCheckInProgress {
+		log.Println("[L0] Skipping check because another one is already in progress.")
+		return
+	}
+
+	c.didRollback = false
+	c.isCheckInProgress = true
 
 	var nodes []netip.AddrPort
-	for _, addr := range c.config.Ips {
-		addrPort := netip.AddrPortFrom(addr, c.config.L0Port)
+	for _, addr := range c.ips {
+		addrPort := netip.AddrPortFrom(addr, c.port)
 		nodes = append(nodes, addrPort)
 	}
 
-	ordinal, err := http.FetchLatestOrdinal(c.config.BlockExplorerUrl)
+	ordinal, err := http.FetchLatestOrdinal(c.blockExplorerUrl)
 	if err != nil {
 		log.Println("[L0] Couldn't fetch latest ordinal:", err)
 		// TODO: Notify
@@ -88,9 +104,7 @@ func (c *L0Checker) Check() {
 	} else {
 		log.Println("[L0] Rollback needed:", ordinal, "<=", c.PrevOrdinal)
 		// TODO: Notify
-		rollback.Restart(c.config.RollbackScriptPath)
-
-		time.Sleep(time.Second * 10)
+		c.rollbackService.Restart()
 
 		nodeToCheck := nodes[0]
 		clusterInfo, err := http.FetchClusterInfo(nodeToCheck)
@@ -104,12 +118,12 @@ func (c *L0Checker) Check() {
 			log.Println("[L0] Rollback succeeded")
 			c.PrevOrdinal = 0
 			time.Sleep(time.Second * 10)
-			c.DidRollback = true
+			c.didRollback = true
 		} else {
 			log.Panicln("[L0] Nodes are either Offline/Leaving or not present in the cluster. Run rollback manually and restart auto-rollback script.")
 			// TODO: Notify
 		}
 	}
 
-	c.IsCheckInProgress = false
+	c.isCheckInProgress = false
 }
