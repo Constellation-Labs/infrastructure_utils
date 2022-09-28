@@ -10,6 +10,7 @@ import (
 )
 
 var blockExplorerUrl = flag.String("block-explorer", "", "Url to block-explorer")
+var slackWebhookUrl = flag.String("slack-webhook-url", "", "Webhook url for Slack notifications")
 var rollbackScriptPath = flag.String("script", "./rollback", "Path to rollback script")
 var hostsPath = flag.String("hosts", "./cluster-hosts", "Path to hosts file")
 var interval = flag.String("interval", "3m", "Interval of checking block-explorer")
@@ -26,6 +27,7 @@ type Config struct {
 	L0Port             uint16
 	L1Port             uint16
 	Ips                []netip.Addr
+	SlackWebhookUrl    string
 }
 
 func normalizeUrl(url string) string {
@@ -50,6 +52,9 @@ func Load() Config {
 	if err != nil {
 		log.Fatalln("Cannot parse duration:", err)
 	}
+	if len(*slackWebhookUrl) == 0 {
+		log.Fatalln("Slack webhook cannot be empty")
+	}
 
 	return Config{
 		BlockExplorerUrl:   normalizeUrl(*blockExplorerUrl),
@@ -60,5 +65,6 @@ func Load() Config {
 		L0Port:             uint16(*l0Port),
 		L1Port:             uint16(*l1Port),
 		Ips:                ips,
+		SlackWebhookUrl:    *slackWebhookUrl,
 	}
 }

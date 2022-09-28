@@ -6,6 +6,7 @@ import (
 	"tessellation/l0"
 	"tessellation/l1"
 	"tessellation/rollback"
+	"tessellation/slack"
 	"time"
 )
 
@@ -18,8 +19,9 @@ func main() {
 	ticker := time.NewTicker(cfg.Interval)
 
 	rollbackService := rollback.GetService(cfg.RollbackScriptPath, cfg.CommandTimeout)
-	l0Service := l0.GetService(rollbackService, cfg.L0Port, cfg.Ips, cfg.BlockExplorerUrl)
-	l1Service := l1.GetService(rollbackService, cfg.L1Port, cfg.Ips)
+	slack := slack.GetService(cfg.SlackWebhookUrl)
+	l0Service := l0.GetService(rollbackService, slack, cfg.L0Port, cfg.Ips, cfg.BlockExplorerUrl)
+	l1Service := l1.GetService(rollbackService, slack, cfg.L1Port, cfg.Ips)
 
 	for range ticker.C {
 		l0Service.Check()

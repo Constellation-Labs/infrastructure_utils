@@ -1,39 +1,15 @@
 package l0
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"net/netip"
 	"tessellation/http"
 	"tessellation/rollback"
+	"tessellation/slack"
 	"time"
 )
-
-type NodeCheckResult struct {
-	Valid   []netip.AddrPort
-	Invalid []netip.AddrPort
-}
-
-func verifyNodeStates(ips []netip.AddrPort, clusterInfo http.ClusterInfo) *NodeCheckResult {
-	var valid []netip.AddrPort
-	var invalid []netip.AddrPort
-
-	for _, ip := range ips {
-		for _, info := range clusterInfo {
-			if info.Ip.String() == ip.Addr().String() {
-				if info.State != "Leaving" && info.State != "Offline" {
-					valid = append(valid, ip)
-				} else {
-					invalid = append(invalid, ip)
-				}
-			}
-		}
-	}
-
-	return &NodeCheckResult{
-		Valid:   valid,
-		Invalid: invalid,
-	}
-}
 
 type Checker interface {
 	Check()
@@ -48,9 +24,10 @@ type l0Checker struct {
 	port              uint16
 	blockExplorerUrl  string
 	rollbackService   rollback.Service
+	slack             slack.Notifier
 }
 
-func GetService(rollbackService rollback.Service, port uint16, ips []netip.Addr, blockExplorerUrl string) Checker {
+func GetService(rollbackService rollback.Service, slack slack.Notifier, port uint16, ips []netip.Addr, blockExplorerUrl string) Checker {
 	return &l0Checker{
 		didRollback:       false,
 		isCheckInProgress: false,
@@ -59,6 +36,7 @@ func GetService(rollbackService rollback.Service, port uint16, ips []netip.Addr,
 		ips:               ips,
 		blockExplorerUrl:  blockExplorerUrl,
 		rollbackService:   rollbackService,
+		slack:             slack,
 	}
 }
 
@@ -71,7 +49,17 @@ func (c *l0Checker) Check() {
 		if r := recover(); r != nil {
 			c.didRollback = false
 			c.isCheckInProgress = false
-			log.Println("Recovered from:", r)
+			var err error
+			switch x := r.(type) {
+			case string:
+				err = errors.New(x)
+			case error:
+				err = x
+			default:
+				err = errors.New("unknown error")
+			}
+			log.Println("L0 - Unhandled exception", err.Error())
+			c.slack.NotifyException("L0 - Unhandled exception", err.Error())
 		}
 	}()
 
@@ -91,8 +79,8 @@ func (c *l0Checker) Check() {
 
 	ordinal, err := http.FetchLatestOrdinal(c.blockExplorerUrl)
 	if err != nil {
-		log.Println("[L0] Couldn't fetch latest ordinal:", err)
-		// TODO: Notify
+		c.slack.NotifyException("L0 - Cluster check failed.", "Couldn't fetch the latest ordinal from block-explorer")
+		log.Println("[L0] Couldn't fetch the latest ordinal from block-explorer:", err)
 		return
 	}
 
@@ -101,26 +89,12 @@ func (c *l0Checker) Check() {
 		c.PrevOrdinal = ordinal
 	} else {
 		log.Println("[L0] Rollback needed:", ordinal, "<=", c.PrevOrdinal)
-		// TODO: Notify
+		c.slack.NotifyError("L0 - Triggered rollback.", fmt.Sprintln("The cluster is stuck at ordinal", ordinal))
 		c.rollbackService.Restart()
-
-		nodeToCheck := nodes[0]
-		clusterInfo, err := http.FetchClusterInfo(nodeToCheck)
-		if err != nil {
-			log.Panicln("[L0] Couldn't fetch cluster/info from", nodeToCheck.String(), err)
-		}
-
-		nodeCheckResult := verifyNodeStates(nodes, clusterInfo)
-
-		if len(nodeCheckResult.Invalid) == 0 {
-			log.Println("[L0] Rollback succeeded")
-			c.PrevOrdinal = 0
-			time.Sleep(time.Second * 10)
-			c.didRollback = true
-		} else {
-			log.Panicln("[L0] Nodes are either Offline/Leaving or not present in the cluster. Run rollback manually and restart auto-rollback script.")
-			// TODO: Notify
-		}
+		c.PrevOrdinal = 0
+		c.slack.NotifySuccess("L0 - Rollback succeeded.", "")
+		time.Sleep(time.Second * 10)
+		c.didRollback = true
 	}
 
 	c.isCheckInProgress = false
