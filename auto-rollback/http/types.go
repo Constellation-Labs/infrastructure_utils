@@ -17,6 +17,11 @@ type ClusterNodeInfo struct {
 	Id    string `json:"id"`
 }
 
+type NodeInfo struct {
+	Id   string `json:"id"`
+	Host NodeIp `json:"host"`
+}
+
 type NodeIp struct {
 	netip.Addr
 }

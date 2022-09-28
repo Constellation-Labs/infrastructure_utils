@@ -57,28 +57,16 @@ func (c *L1Checker) Check() {
 	if len(down) == 0 {
 		log.Println("[L1] OK")
 	} else if len(down) < len(nodes) {
-		peerInCluster := inCluster[0]
+		rejoinTarget := inCluster[0]
 
-		log.Println("[L1] Some peers are not responsive:", down, "-> Restaring and rejoining them to", peerInCluster)
+		log.Println("[L1] Some peers are not responsive:", down, "-> Restaring and rejoining them to", rejoinTarget)
 
-		clusterInfo, err := http.FetchClusterInfo(peerInCluster)
+		rejoinTargetInfo, err := http.FetchNodeInfo(rejoinTarget)
 		if err != nil {
-			log.Panicln("[L1] Couldn't fetch cluster/info from ready peer")
+			log.Panicln("[L1] Couldn't fetch node/info from rejoin target peer")
 		}
 
-		// TODO: Use node/info when 'id` is available there`
-		var rejoinTarget rollback.JoinTarget
-		for _, info := range clusterInfo {
-			if info.Ip.Addr.String() == peerInCluster.Addr().String() {
-				rejoinTarget = rollback.JoinTarget{
-					Ip: info.Ip.Addr,
-					Id: info.Id,
-				}
-			}
-		}
-
-		rollback.RestartL1Choosen(c.config.RollbackScriptPath, down)
-		rollback.JoinL1Choosen(c.config.RollbackScriptPath, down, rejoinTarget)
+		rollback.RejoinL1Chosen(c.config.RollbackScriptPath, down, rejoinTargetInfo.Id, rejoinTargetInfo.Host.Addr)
 	} else {
 		log.Println("[L1] All the peers are down:", down, "-> Restarting L1 cluster.")
 		rollback.RestartL1Initial(c.config.RollbackScriptPath)
