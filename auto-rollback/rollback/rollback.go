@@ -2,6 +2,8 @@ package rollback
 
 import (
 	"bufio"
+	"errors"
+	"fmt"
 	"log"
 	"net/netip"
 	"os/exec"
@@ -68,7 +70,7 @@ func (r rollback) runWithStdout(arg ...string) {
 
 	err = cmd.Wait()
 	if err != nil {
-		log.Fatalln("Command timeout: ", r.scriptPath, arg, err)
+		panic(errors.New(fmt.Sprintln("Command timeout: ", r.scriptPath, arg, err)))
 	}
 	timer.Stop()
 }

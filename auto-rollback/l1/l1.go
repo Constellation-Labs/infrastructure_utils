@@ -1,10 +1,13 @@
 package l1
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"net/netip"
 	"tessellation/http"
 	"tessellation/rollback"
+	"tessellation/slack"
 )
 
 type l1Checker struct {
@@ -13,19 +16,21 @@ type l1Checker struct {
 	ips               []netip.Addr
 	port              uint16
 	rollbackService   rollback.Service
+	slack             slack.Notifier
 }
 
 type Checker interface {
 	Check()
 }
 
-func GetService(rollbackService rollback.Service, port uint16, ips []netip.Addr) Checker {
+func GetService(rollbackService rollback.Service, slack slack.Notifier, port uint16, ips []netip.Addr) Checker {
 	return &l1Checker{
 		isFirstRun:        true,
 		isCheckInProgress: false,
 		ips:               ips,
 		port:              port,
 		rollbackService:   rollbackService,
+		slack:             slack,
 	}
 }
 
@@ -33,7 +38,17 @@ func (c *l1Checker) Check() {
 	defer func() {
 		if r := recover(); r != nil {
 			c.isCheckInProgress = false
-			log.Println("Recovered from:", r)
+			var err error
+			switch x := r.(type) {
+			case string:
+				err = errors.New(x)
+			case error:
+				err = x
+			default:
+				err = errors.New("unknown error")
+			}
+			log.Println("L0 - Unhandled exception", err.Error())
+			c.slack.NotifyException("L0 - Unhandled exception", err.Error())
 		}
 	}()
 
@@ -73,17 +88,22 @@ func (c *l1Checker) Check() {
 	} else if len(down) < len(nodes) {
 		rejoinTarget := inCluster[0]
 
-		log.Println("[L1] Some peers are not responsive:", down, "-> Restaring and rejoining them to", rejoinTarget)
+		log.Println("[L1] Some peers are not responsive:", down, "-> Restarting and rejoining them to", rejoinTarget)
+		c.slack.NotifyError("L1 - Rejoining unresponsive nodes", fmt.Sprintln(down, "->", rejoinTarget))
 
 		rejoinTargetInfo, err := http.FetchNodeInfo(rejoinTarget)
 		if err != nil {
-			log.Panicln("[L1] Couldn't fetch node/info from rejoin target peer")
+			c.slack.NotifyException("L1 - Rejoining nodes failed", fmt.Sprintln(down, "->", rejoinTarget))
+			log.Println("[L1] Couldn't fetch node/info from rejoin target peer", err)
 		}
 
 		c.rollbackService.RejoinL1Chosen(down, rejoinTargetInfo.Id, rejoinTargetInfo.Host.Addr)
+		c.slack.NotifySuccess("L1 - Rejoining nodes succeeded", fmt.Sprintln(down, "->", rejoinTarget))
 	} else {
 		log.Println("[L1] All the peers are down:", down, "-> Restarting L1 cluster.")
+		c.slack.NotifyError("L1 - Restarting and rejoining all the nodes", "")
 		c.rollbackService.RestartL1Initial()
+		c.slack.NotifySuccess("L1 - Restarting and rejoining all the nodes succeeded", "")
 	}
 
 	c.isCheckInProgress = false
