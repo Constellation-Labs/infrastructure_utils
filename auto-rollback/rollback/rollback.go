@@ -2,11 +2,11 @@ package rollback
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net/netip"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 type JoinTarget struct {
@@ -14,31 +14,17 @@ type JoinTarget struct {
 	Ip netip.Addr
 }
 
-func runWithStdout(cmd *exec.Cmd) {
-	cmdReader, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Fatalln("Error creating StdoutPipe for Cmd", err)
-		return
-	}
+type Service interface {
+	Restart()
+	RestartL1Initial()
+	RestartL1Chosen(nodes []netip.AddrPort)
+	JoinL1Chosen(nodes []netip.AddrPort, toNodeId string, toNodeIp netip.Addr)
+	RejoinL1Chosen(nodes []netip.AddrPort, toNodeId string, toNodeIp netip.Addr)
+}
 
-	scanner := bufio.NewScanner(cmdReader)
-	go func() {
-		for scanner.Scan() {
-			fmt.Printf("\t%s\n", scanner.Text())
-		}
-	}()
-
-	err = cmd.Start()
-	if err != nil {
-		log.Fatalln("Error starting Cmd: ", err)
-		return
-	}
-
-	err = cmd.Wait()
-	if err != nil {
-		log.Fatalln("Error waiting for Cmd: ", err)
-		return
-	}
+type rollback struct {
+	terminateAfter time.Duration
+	scriptPath     string
 }
 
 func toTargets(nodes []netip.AddrPort) string {
@@ -49,23 +35,61 @@ func toTargets(nodes []netip.AddrPort) string {
 	return strings.Join(targets, " ")
 }
 
-func Restart(scriptPath string) {
-	runWithStdout(exec.Command(scriptPath, "restart"))
+func GetService(scriptPath string, terminateAfter time.Duration) Service {
+	return &rollback{
+		scriptPath:     scriptPath,
+		terminateAfter: terminateAfter,
+	}
 }
 
-func RestartL1Initial(scriptPath string) {
-	runWithStdout(exec.Command(scriptPath, "restartL1Initial"))
+func (r rollback) runWithStdout(arg ...string) {
+	cmd := exec.Command(r.scriptPath, arg...)
+	cmdReader, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatalln("Error creating StdoutPipe for Cmd", err)
+		return
+	}
+
+	scanner := bufio.NewScanner(cmdReader)
+	go func() {
+		for scanner.Scan() {
+			log.Printf("\t%s\n", scanner.Text())
+		}
+	}()
+
+	err = cmd.Start()
+	if err != nil {
+		log.Fatalln("Error starting Cmd: ", err)
+	}
+
+	timer := time.AfterFunc(r.terminateAfter, func() {
+		cmd.Process.Kill()
+	})
+
+	err = cmd.Wait()
+	if err != nil {
+		log.Fatalln("Command timeout: ", r.scriptPath, arg, err)
+	}
+	timer.Stop()
 }
 
-func RestartL1Chosen(scriptPath string, nodes []netip.AddrPort) {
-	runWithStdout(exec.Command(scriptPath, "restartL1Choosen", toTargets(nodes)))
+func (r rollback) Restart() {
+	r.runWithStdout("restart")
 }
 
-func JoinL1Chosen(scriptPath string, nodes []netip.AddrPort, toNodeId string, toNodeIp netip.Addr) {
-	runWithStdout(exec.Command(scriptPath, "joinL1Choosen", toNodeId, toNodeIp.String(), toTargets(nodes)))
+func (r rollback) RestartL1Initial() {
+	r.runWithStdout("restartL1Initial")
 }
 
-func RejoinL1Chosen(scriptPath string, nodes []netip.AddrPort, toNodeId string, toNodeIp netip.Addr) {
-	RestartL1Chosen(scriptPath, nodes)
-	JoinL1Chosen(scriptPath, nodes, toNodeId, toNodeIp)
+func (r rollback) RestartL1Chosen(nodes []netip.AddrPort) {
+	r.runWithStdout("restartL1Choosen", toTargets(nodes))
+}
+
+func (r rollback) JoinL1Chosen(nodes []netip.AddrPort, toNodeId string, toNodeIp netip.Addr) {
+	r.runWithStdout("joinL1Choosen", toNodeId, toNodeIp.String(), toTargets(nodes))
+}
+
+func (r rollback) RejoinL1Chosen(nodes []netip.AddrPort, toNodeId string, toNodeIp netip.Addr) {
+	r.RestartL1Chosen(nodes)
+	r.JoinL1Chosen(nodes, toNodeId, toNodeIp)
 }

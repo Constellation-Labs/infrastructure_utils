@@ -42,7 +42,7 @@ func FetchNodeInfo(ip netip.AddrPort) (*NodeInfo, error) {
 	}
 	var result NodeInfo
 	if err := json.Unmarshal(body, &result); err != nil {
-		log.Println("Can not unmarshal GlobalSnapshot")
+		log.Println("Can not unmarshal NodeInfo")
 		return nil, err
 	}
 	return &result, nil

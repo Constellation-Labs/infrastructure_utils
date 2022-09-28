@@ -15,12 +15,14 @@ var hostsPath = flag.String("hosts", "./cluster-hosts", "Path to hosts file")
 var interval = flag.String("interval", "3m", "Interval of checking block-explorer")
 var l0Port = flag.Uint("port", 9000, "L0 public port")
 var l1Port = flag.Uint("l1-port", 9010, "L1 public port")
+var commandTimeout = flag.String("command-timeout", "10m", "Timeout after which command will be terminated")
 
 type Config struct {
 	BlockExplorerUrl   string
 	RollbackScriptPath string
 	HostsPath          string
 	Interval           time.Duration
+	CommandTimeout     time.Duration
 	L0Port             uint16
 	L1Port             uint16
 	Ips                []netip.Addr
@@ -44,12 +46,17 @@ func Load() Config {
 	if err != nil {
 		log.Fatalln("Cannot parse duration:", err)
 	}
+	commandTimeout, err := time.ParseDuration(*commandTimeout)
+	if err != nil {
+		log.Fatalln("Cannot parse duration:", err)
+	}
 
 	return Config{
 		BlockExplorerUrl:   normalizeUrl(*blockExplorerUrl),
 		RollbackScriptPath: *rollbackScriptPath,
 		HostsPath:          *hostsPath,
 		Interval:           interval,
+		CommandTimeout:     commandTimeout,
 		L0Port:             uint16(*l0Port),
 		L1Port:             uint16(*l1Port),
 		Ips:                ips,
