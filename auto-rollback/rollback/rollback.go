@@ -57,10 +57,15 @@ func RestartL1Initial(scriptPath string) {
 	runWithStdout(exec.Command(scriptPath, "restartL1Initial"))
 }
 
-func RestartL1Choosen(scriptPath string, nodes []netip.AddrPort) {
+func RestartL1Chosen(scriptPath string, nodes []netip.AddrPort) {
 	runWithStdout(exec.Command(scriptPath, "restartL1Choosen", toTargets(nodes)))
 }
 
-func JoinL1Choosen(scriptPath string, nodes []netip.AddrPort, toNode JoinTarget) {
-	runWithStdout(exec.Command(scriptPath, "joinL1Choosen", toNode.Id, toNode.Ip.String(), toTargets(nodes)))
+func JoinL1Chosen(scriptPath string, nodes []netip.AddrPort, toNodeId string, toNodeIp netip.Addr) {
+	runWithStdout(exec.Command(scriptPath, "joinL1Choosen", toNodeId, toNodeIp.String(), toTargets(nodes)))
+}
+
+func RejoinL1Chosen(scriptPath string, nodes []netip.AddrPort, toNodeId string, toNodeIp netip.Addr) {
+	RestartL1Chosen(scriptPath, nodes)
+	JoinL1Chosen(scriptPath, nodes, toNodeId, toNodeIp)
 }

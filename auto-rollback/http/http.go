@@ -26,6 +26,28 @@ func FetchNodeHealth(ip netip.AddrPort) error {
 	}
 }
 
+func FetchNodeInfo(ip netip.AddrPort) (*NodeInfo, error) {
+	resp, err := http.Get(ToUrl(ip) + "node/info")
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	if resp.StatusCode >= 400 {
+		return nil, errors.New(resp.Status)
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	var result NodeInfo
+	if err := json.Unmarshal(body, &result); err != nil {
+		log.Println("Can not unmarshal GlobalSnapshot")
+		return nil, err
+	}
+	return &result, nil
+}
+
 func FetchLatestOrdinal(blockExplorerUrl string) (uint64, error) {
 	resp, err := http.Get(blockExplorerUrl + "global-snapshots/latest")
 	if err != nil {
