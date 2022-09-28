@@ -96,8 +96,6 @@ func (c *l0Checker) Check() {
 		return
 	}
 
-	log.Println(ordinal, c.PrevOrdinal)
-
 	if ordinal > c.PrevOrdinal {
 		log.Println("[L0] OK")
 		c.PrevOrdinal = ordinal
