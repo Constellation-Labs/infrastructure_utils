@@ -28,6 +28,8 @@ func main() {
 
 		if l0Service.DidRollback() {
 			log.Println("[L1] Skipping check because L0 did a rollback.")
+		} else if l0Service.FailedRollback() {
+			log.Println("[L1] Skipping check because L0 rollback failed.")
 		} else {
 			l1Service.Check()
 		}
