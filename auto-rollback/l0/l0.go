@@ -14,10 +14,12 @@ import (
 type Checker interface {
 	Check()
 	DidRollback() bool
+	FailedRollback() bool
 }
 
 type l0Checker struct {
 	didRollback       bool
+	failedRollback    bool
 	isCheckInProgress bool
 	PrevOrdinal       uint64
 	ips               []netip.Addr
@@ -30,6 +32,7 @@ type l0Checker struct {
 func GetService(rollbackService rollback.Service, slack slack.Notifier, port uint16, ips []netip.Addr, blockExplorerUrl string) Checker {
 	return &l0Checker{
 		didRollback:       false,
+		failedRollback:    false,
 		isCheckInProgress: false,
 		PrevOrdinal:       uint64(0),
 		port:              port,
@@ -44,11 +47,16 @@ func (c *l0Checker) DidRollback() bool {
 	return c.didRollback
 }
 
+func (c *l0Checker) FailedRollback() bool {
+	return c.failedRollback
+}
+
 func (c *l0Checker) Check() {
 	defer func() {
 		if r := recover(); r != nil {
 			c.didRollback = false
 			c.isCheckInProgress = false
+			c.failedRollback = true
 			var err error
 			switch x := r.(type) {
 			case string:
@@ -68,6 +76,7 @@ func (c *l0Checker) Check() {
 		return
 	}
 
+	c.failedRollback = false
 	c.didRollback = false
 	c.isCheckInProgress = true
 
