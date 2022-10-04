@@ -39,15 +39,18 @@ resource "aws_instance" "grafana" {
       "sudo chmod +x /usr/local/bin/docker-compose",
       "cd /home/${local.ssh_user}",
       "mkdir grafana prometheus",
-      "cd grafana",
+      "cd /home/${local.ssh_user}/grafana",
       "mkdir config dashboards datasources storage",
-      "sudo chown -R 104:104 /home/${local.ssh_user}/grafana",
-      "sudo chmod -R 777 /home/${local.ssh_user}/grafana",
+      "cd /home/${local.ssh_user}/prometheus",
+      "mkdir config storage",
     ]
   }
 
   provisioner "file" {
-    source = "${path.module}/templates/docker-compose.yml"
+    content = templatefile("${path.module}/templates/docker-compose.yml.tftpl", {
+      public_ip = aws_instance.grafana.public_ip
+      container_user = var.container_user
+    })
     destination = "/home/${local.ssh_user}/docker-compose.yml"
   }
 
@@ -57,7 +60,7 @@ resource "aws_instance" "grafana" {
       public_port = var.public_port
       l1_public_port = var.l1_public_port
     })
-    destination = "/home/${local.ssh_user}/prometheus/prometheus.yaml"
+    destination = "/home/${local.ssh_user}/prometheus/config/prometheus.yaml"
   }
 
   provisioner "file" {
@@ -72,6 +75,7 @@ resource "aws_instance" "grafana" {
 
   provisioner "remote-exec" {
     inline = [
+      "sudo chown -R ${var.container_user}:${var.container_user} /home/${local.ssh_user}/grafana /home/${local.ssh_user}/prometheus",
       "docker-compose up -d"
     ]
   }

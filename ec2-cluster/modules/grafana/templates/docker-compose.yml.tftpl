@@ -5,21 +5,26 @@ services:
     image: prom/prometheus:latest
     ports:
       - '9090:9090'
+    user: '${container_user}'
     command:
       - --config.file=/etc/prometheus/prometheus.yaml
+      - --storage.tsdb.path=/prometheus/data
       - --storage.tsdb.retention.time=200h
     volumes:
-      - ./prometheus:/etc/prometheus:ro
+      - ./prometheus/config:/etc/prometheus:ro
+      - ./prometheus/storage:/prometheus/data
   node-exporter:
     image: prom/node-exporter:latest
     ports:
       - '9100:9100'
+    user: '${container_user}'
   grafana:
     image: grafana/grafana-oss:latest
     depends_on:
       - prometheus
     ports:
       - "3000:3000"
+    user: '${container_user}'
     volumes:
       - ./grafana/config:/etc/grafana/provisioning
       - ./grafana/storage:/var/lib/grafana
@@ -28,3 +33,7 @@ services:
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE="Admin"
+      - GF_AUTH_ANONYMOUS_ORG_ROLE="Viewer"
+      - GF_AUTH_ANONYMOUS_ORG_NAME="Constellation"
+      - GF_SERVER_ROOT_URL=http://${public_ip}:3000/
+      - GF_INSTALL_PLUGINS=natel-discrete-panel
