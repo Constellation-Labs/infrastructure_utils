@@ -90,6 +90,9 @@ func (c *l0Checker) Check() {
 	if err != nil {
 		c.slack.NotifyException("L0 - Cluster check failed.", "Couldn't fetch the latest ordinal from block-explorer")
 		log.Println("[L0] Couldn't fetch the latest ordinal from block-explorer:", err)
+		c.didRollback = false
+		c.isCheckInProgress = false
+		c.failedRollback = false
 		return
 	}
 
