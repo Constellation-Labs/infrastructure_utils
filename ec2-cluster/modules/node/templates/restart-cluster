@@ -22,6 +22,7 @@ bucket_access_key=${bucket_access_key}
 bucket_secret_key=${bucket_secret_key}
 l0_public_port=${l0_public_port}
 l1_public_port=${l1_public_port}
+wait_before_rollback="30s"
 
 stopL0LB() {
   curl -X POST http://$l0_lb:$lb_maintenance_port/settings/maintenance
@@ -232,6 +233,7 @@ joinL1ChoosenNode() {
 restart(){
   stopLB
   stop $1
+  sleep "$wait_before_rollback"
   downloadRollbackSnapshot
   startRollback $1
   startLB
