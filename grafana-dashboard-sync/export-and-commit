@@ -1,0 +1,35 @@
+#!/bin/bash
+
+GITHUB_TOKEN=$1
+API_KEY=$2
+
+/home/ec2-user/grafana/sync/grafana-sync pull-dashboards --apikey="$API_KEY" --directory="/home/ec2-user/grafana/sync/dashboards" --url http://127.0.0.1:3000 &&
+  for FILE in /home/ec2-user/grafana/sync/dashboards/*.json; do
+    NAME=$(basename "$FILE")
+    jq . "$FILE" > /home/ec2-user/grafana/sync/infrastructure_utils/ec2-cluster/modules/grafana/templates/grafana/dashboards/"$NAME"
+  done
+
+cd /home/ec2-user/grafana/sync/infrastructure_utils/ || exit
+
+git add .
+
+if [ -n "$(git status --porcelain)" ]; then
+  echo "Found new changes in dashboards. Committing."
+    export GITHUB_TOKEN="$GITHUB_TOKEN"
+    TIMESTAMP=$(date +%s)
+    BRANCH="dashboard-sync-$TIMESTAMP"
+    git fetch origin && \
+    git stash push -m "$TIMESTAMP" && \
+    git checkout master && \
+    git pull origin master && \
+    git checkout -b "$BRANCH" && \
+    git stash apply stash^{/"$TIMESTAMP"} && \
+    git commit -a -m "Dashboard sync $TIMESTAMP" && \
+    git push --set-upstream origin "$BRANCH" && \
+    /home/ec2-user/grafana/sync/gh pr create --fill --head "$BRANCH" --base master && \
+    git checkout master && \
+    git branch -d "$BRANCH" || \
+    echo "Committing dashboard changes failed!"
+else
+  echo "No changes in dashboards."
+fi
