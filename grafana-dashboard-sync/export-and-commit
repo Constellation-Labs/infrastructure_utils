@@ -18,10 +18,9 @@ if [ -n "$(git status --porcelain)" ]; then
     export GITHUB_TOKEN="$GITHUB_TOKEN"
     TIMESTAMP=$(date +%s)
     BRANCH="dashboard-sync-$TIMESTAMP"
-    git fetch origin && \
     git stash push -m "$TIMESTAMP" && \
-    git checkout master && \
-    git pull origin master && \
+    git fetch origin && \
+    git reset --hard origin/master && \
     git checkout -b "$BRANCH" && \
     git stash apply stash^{/"$TIMESTAMP"} && \
     git commit -a -m "Dashboard sync $TIMESTAMP" && \
