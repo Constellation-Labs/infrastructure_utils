@@ -1,27 +1,27 @@
 {
   "__requires": [
     {
-      "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
+      "type": "grafana",
       "version": "4.6.1"
     },
     {
-      "type": "panel",
       "id": "graph",
       "name": "Graph",
+      "type": "panel",
       "version": ""
     },
     {
-      "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
+      "type": "datasource",
       "version": "1.0.0"
     },
     {
-      "type": "panel",
       "id": "singlestat",
       "name": "Singlestat",
+      "type": "panel",
       "version": ""
     }
   ],
@@ -57,7 +57,7 @@
   "gnetId": 4701,
   "graphTooltip": 1,
   "hideControls": false,
-  "id": null,
+  "id": 1,
   "links": [],
   "refresh": "30s",
   "rows": [
@@ -3155,5 +3155,6 @@
   },
   "timezone": "browser",
   "title": "JVM (Micrometer)",
-  "version": 24
+  "uid": "Nqsrzm4Vz",
+  "version": 1
 }
