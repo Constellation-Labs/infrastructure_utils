@@ -2,6 +2,8 @@
 
 GITHUB_TOKEN=$1
 API_KEY=$2
+PUSH_API_KEY=$3
+PUSH_API_URL=$4
 
 /home/ec2-user/grafana/sync/grafana-sync pull-dashboards --apikey="$API_KEY" --directory="/home/ec2-user/grafana/sync/dashboards" --url http://127.0.0.1:3000 &&
   for FILE in /home/ec2-user/grafana/sync/dashboards/*.json; do
@@ -29,6 +31,10 @@ if [ -n "$(git status --porcelain)" ]; then
     git checkout master && \
     git branch -d "$BRANCH" || \
     echo "Committing dashboard changes failed!"
+
+    echo "Pushing changes to Grafana instance: $PUSH_API_URL" && \
+    /home/ec2-user/grafana/sync/grafana-sync push-dashboards --apikey="$PUSH_API_KEY" --directory="/home/ec2-user/grafana/sync/dashboards" --url "$PUSH_API_URL" || \
+    echo "Pushing changed to Grafana instance failed!"
 else
   echo "No changes in dashboards."
 fi
