@@ -663,7 +663,7 @@
               },
               {
                 "color": "red",
-                "value": 12
+                "value": 17
               }
             ]
           },
@@ -1899,6 +1899,6 @@
   "timezone": "",
   "title": "Tessellation",
   "uid": "lro46qC7k",
-  "version": 24,
+  "version": 25,
   "weekStart": ""
 }
