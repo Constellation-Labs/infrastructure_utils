@@ -29,6 +29,7 @@
   "liveNow": false,
   "panels": [
     {
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -36,6 +37,7 @@
         "y": 0
       },
       "id": 25,
+      "panels": [],
       "title": "Cluster info",
       "type": "row"
     },
@@ -160,31 +162,170 @@
         "type": "prometheus",
         "uid": "P1809F7CD0C75ACF3"
       },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "gradient-gauge",
+            "filterable": false,
+            "inspect": false
+          },
+          "decimals": 2,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "string"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "auto"
+              },
+              {
+                "id": "custom.width",
+                "value": 130
+              },
+              {
+                "id": "unit",
+                "value": "string"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Peer ID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
       "gridPos": {
-        "h": 12,
+        "h": 19,
         "w": 12,
         "x": 12,
         "y": 1
       },
-      "id": 48,
+      "id": 51,
       "options": {
-        "alertInstanceLabelFilter": "",
-        "alertName": "",
-        "dashboardAlerts": false,
-        "groupBy": [],
-        "groupMode": "default",
-        "maxItems": 20,
-        "sortOrder": 1,
-        "stateFilter": {
-          "error": true,
-          "firing": true,
-          "noData": true,
-          "normal": true,
-          "pending": true
-        }
+        "footer": {
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 181,
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Value"
+          }
+        ]
       },
-      "title": "Health",
-      "type": "alertlist"
+      "pluginVersion": "9.1.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "(disk_total_bytes{application=\"dag-l0\",ip=~\"$ip\", peer_id=~\"$peer_id\"} - disk_free_bytes{application=\"dag-l0\",ip=~\"$ip\", peer_id=~\"$peer_id\"}) * 100 / disk_total_bytes{application=\"dag-l0\",ip=~\"$ip\", peer_id=~\"$peer_id\"}",
+          "format": "table",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{ ip }} {{ peer_id_short }}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Disk usage on L0",
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Value": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "instance": {
+                "aggregations": []
+              },
+              "ip": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "peer_id_short": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              }
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "Value (lastNotNull)"
+              }
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Value (lastNotNull)": "Disk usage",
+              "instance": "Instance",
+              "ip": "IP",
+              "peer_id_short (lastNotNull)": "Peer ID"
+            }
+          }
+        }
+      ],
+      "type": "table"
     },
     {
       "datasource": {
@@ -307,12 +448,43 @@
       "type": "stat"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "id": 48,
+      "options": {
+        "alertInstanceLabelFilter": "",
+        "alertName": "",
+        "dashboardAlerts": false,
+        "groupBy": [],
+        "groupMode": "default",
+        "maxItems": 20,
+        "sortOrder": 1,
+        "stateFilter": {
+          "error": true,
+          "firing": true,
+          "noData": true,
+          "normal": true,
+          "pending": true
+        }
+      },
+      "title": "Health",
+      "type": "alertlist"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 20
       },
       "id": 23,
       "panels": [],
@@ -380,7 +552,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 14
+        "y": 21
       },
       "id": 34,
       "options": {
@@ -470,7 +642,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 21
       },
       "id": 46,
       "options": {
@@ -564,7 +736,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 22
+        "y": 29
       },
       "id": 29,
       "options": {
@@ -675,7 +847,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 22
+        "y": 29
       },
       "id": 42,
       "options": {
@@ -773,7 +945,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 30
+        "y": 37
       },
       "id": 36,
       "options": {
@@ -860,7 +1032,7 @@
         "h": 4,
         "w": 12,
         "x": 12,
-        "y": 30
+        "y": 37
       },
       "highlightOnMouseover": true,
       "id": 43,
@@ -1014,7 +1186,7 @@
         "h": 12,
         "w": 12,
         "x": 12,
-        "y": 34
+        "y": 41
       },
       "highlightOnMouseover": true,
       "id": 49,
@@ -1199,7 +1371,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 38
+        "y": 45
       },
       "id": 35,
       "options": {
@@ -1250,7 +1422,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 53
       },
       "id": 2,
       "panels": [],
@@ -1282,7 +1454,7 @@
         "h": 8,
         "w": 6,
         "x": 0,
-        "y": 47
+        "y": 54
       },
       "id": 14,
       "options": {
@@ -1349,7 +1521,7 @@
         "h": 8,
         "w": 6,
         "x": 6,
-        "y": 47
+        "y": 54
       },
       "id": 18,
       "options": {
@@ -1455,7 +1627,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 47
+        "y": 54
       },
       "id": 38,
       "options": {
@@ -1553,7 +1725,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 55
+        "y": 62
       },
       "id": 4,
       "options": {
@@ -1652,7 +1824,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 55
+        "y": 62
       },
       "id": 39,
       "options": {
@@ -1719,7 +1891,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 63
+        "y": 70
       },
       "heatmap": {},
       "hideZeroBuckets": false,
@@ -1899,6 +2071,6 @@
   "timezone": "",
   "title": "Tessellation",
   "uid": "lro46qC7k",
-  "version": 25,
+  "version": 29,
   "weekStart": ""
 }
