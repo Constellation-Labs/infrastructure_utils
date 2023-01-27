@@ -2271,7 +2271,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{level}}",
+          "legendFormat": "{{ instance }} | {{ peer_id_short }} | ({{ path }})",
           "metric": "",
           "range": true,
           "refId": "A",
@@ -3785,6 +3785,6 @@
   "timezone": "browser",
   "title": "JVM (Micrometer)",
   "uid": "Nqsrzm4Vz",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
