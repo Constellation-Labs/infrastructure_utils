@@ -749,7 +749,7 @@
           "showLegend": false
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -2071,6 +2071,6 @@
   "timezone": "",
   "title": "Tessellation",
   "uid": "lro46qC7k",
-  "version": 29,
+  "version": 30,
   "weekStart": ""
 }
