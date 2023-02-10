@@ -13,8 +13,7 @@ module "ecr" {
         rulePriority = 1,
         description  = "Keep last ${each.value.capacity} images",
         selection = {
-          tagStatus     = "tagged",
-          tagPrefixList = ["v"],
+          tagStatus     = "any",
           countType     = "imageCountMoreThan",
           countNumber   = each.value.capacity
         },

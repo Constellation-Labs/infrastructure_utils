@@ -16,6 +16,9 @@ variable "repositories" {
     },
     "l1-validator" = {
       capacity = 20
+    },
+    "snapshot-streaming" = {
+      capacity = 20
     }
   }
 }
