@@ -78,7 +78,7 @@ resource "aws_instance" "handler-block-explorer" {
 
 
   provisioner "file" {
-    content = templatefile("templates/application.conf", { sqs = data.aws_sqs_queue.sqsQueue.url, es = aws_elasticsearch_domain.es-domain.endpoint })
+    content = templatefile("templates/application.conf", { sqs = aws_sqs_queue.queue.id, es = aws_elasticsearch_domain.es-domain.endpoint })
     destination = "/home/ec2-user/block-explorer-handler/application.conf"
   }
 

@@ -3,7 +3,7 @@ output "security_group_id" {
 }
 
 output "sqs" {
-  value = data.aws_sqs_queue.sqsQueue.url
+  value = aws_sqs_queue.queue.id
 }
 
 output "es" {

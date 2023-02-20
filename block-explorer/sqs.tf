@@ -24,7 +24,3 @@ POLICY
     Workspace = terraform.workspace
   }
 }
-
-data "aws_sqs_queue" "sqsQueue" {
-  name = aws_sqs_queue.queue.name
-}
