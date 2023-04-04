@@ -38,8 +38,10 @@ resource "aws_iam_user_policy" "loki_bucket_access" {
     Statement = {
       Action = [
         "s3:ListBucket",
+        "s3:ListObjects",
         "s3:PutObject",
-        "s3:GetObject"
+        "s3:GetObject",
+        "s3:DeleteObject"
       ]
       Effect = "Allow"
       Resource = [
