@@ -1,0 +1,42 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "identifier": {
+        "type": "keyword"
+      },
+      "data": {
+        "properties": {
+          "hash": {
+            "type": "keyword"
+          },
+          "snapshotHash": {
+            "type": "keyword"
+          },
+          "snapshotOrdinal": {
+            "type": "long"
+          },
+          "height": {
+            "type": "long"
+          },
+          "parent": {
+            "properties": {
+              "hash": {
+                "type": "keyword"
+              },
+              "height": {
+                "type": "long"
+              }
+            }
+          },
+          "transactions": {
+            "type": "keyword"
+          },
+          "timestamp": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}

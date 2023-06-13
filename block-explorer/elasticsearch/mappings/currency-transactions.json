@@ -1,0 +1,57 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "identifier": {
+        "type": "keyword"
+      },
+      "data": {
+        "properties": {
+          "hash": {
+            "type": "keyword"
+          },
+          "blockHash": {
+            "type": "keyword"
+          },
+          "snapshotHash": {
+            "type": "keyword"
+          },
+          "snapshotOrdinal": {
+            "type": "long"
+          },
+          "amount": {
+            "type": "long"
+          },
+          "destination": {
+            "type": "keyword"
+          },
+          "fee": {
+            "type": "long"
+          },
+          "parent": {
+            "properties": {
+              "hash": {
+                "type": "keyword"
+              },
+              "ordinal": {
+                "type": "long"
+              }
+            }
+          },
+          "salt": {
+            "type": "long"
+          },
+          "source": {
+            "type": "keyword"
+          },
+          "timestamp": {
+            "type": "date"
+          },
+          "transactionOriginal":  {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

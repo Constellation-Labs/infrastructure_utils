@@ -1,0 +1,47 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "identifier": {
+        "type": "keyword"
+      },
+      "data": {
+        "properties": {
+          "hash": {
+            "type": "keyword"
+          },
+          "blocks": {
+            "type": "keyword"
+          },
+          "height": {
+            "type": "long"
+          },
+          "lastSnapshotHash": {
+            "type": "keyword"
+          },
+          "ordinal": {
+            "type": "long"
+          },
+          "rewards": {
+            "properties": {
+              "amount": {
+                "type": "long"
+              },
+              "destination": {
+                "type": "keyword"
+              }
+            }
+          },
+          "subHeight": {
+            "type": "long"
+          },
+          "timestamp": {
+            "type": "date"
+          }
+        }
+      }
+
+
+    }
+  }
+}
