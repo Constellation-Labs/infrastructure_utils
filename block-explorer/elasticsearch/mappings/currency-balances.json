@@ -1,0 +1,29 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "identifier": {
+        "type": "keyword"
+      },
+      "data": {
+        "properties": {
+          "snapshotOrdinal": {
+            "type": "long"
+          },
+          "snapshotHash": {
+            "type": "keyword"
+          },
+          "timestamp": {
+            "type": "date"
+          },
+          "address": {
+            "type": "keyword"
+          },
+          "balance": {
+            "type": "long"
+          }
+        }
+      }
+    }
+  }
+}
