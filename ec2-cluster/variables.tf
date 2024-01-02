@@ -89,3 +89,17 @@ variable "load_balancer_l0_url" {
 variable "load_balancer_l1_url" {
   type = string
 }
+
+variable "grafana_volume_az" {
+  type = string
+  default = "us-west-1b"
+}
+
+variable "grafana_iam_instance_profile" {
+  type = string
+  default = null
+}
+
+variable "grafana_volume_device_name" {
+  type = string
+}

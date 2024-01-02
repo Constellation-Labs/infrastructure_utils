@@ -21,6 +21,9 @@ module "grafana" {
   node_ips = module.nodes.instance_ips
   public_port = var.public_port
   l1_public_port = var.l1_public_port
+  volume_az = var.grafana_volume_az
+  volume_device_name = var.grafana_volume_device_name
+  iam_instance_profile = var.grafana_iam_instance_profile
 }
 
 module "nodes" {
