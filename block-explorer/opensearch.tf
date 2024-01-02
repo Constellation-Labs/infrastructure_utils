@@ -53,7 +53,7 @@ resource "aws_opensearch_domain" "opensearch-domain" {
     dedicated_master_count = var.opensearch_dedicated-master-count
     dedicated_master_enabled = var.opensearch_dedicated-master-count > 0
     dedicated_master_type = var.opensearch_dedicated-master-type
-    zone_awareness_enabled = true
+    zone_awareness_enabled = var.opensearch_zone-awareness-enabled
 
     zone_awareness_config {
       availability_zone_count = 2

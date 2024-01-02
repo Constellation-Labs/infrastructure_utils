@@ -40,6 +40,11 @@ variable "opensearch_dedicated-master-type" {
   default = "r5g.large.search"
 }
 
+variable "opensearch_zone-awareness-enabled" {
+  type    = bool
+  default = true
+}
+
 variable "opensearch_disk-size" {
   type    = string
   default = "200"

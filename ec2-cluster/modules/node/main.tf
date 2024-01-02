@@ -217,7 +217,7 @@ resource "aws_instance" "node" {
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get -qq update",
-      "sudo apt-get -qq install openjdk-8-jdk-headless jq unzip incron pssh -y",
+      "sudo apt-get -qq install openjdk-11-jdk-headless jq unzip incron pssh -y",
       "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
       "unzip -q awscliv2.zip",
       "sudo ./aws/install",
