@@ -3,6 +3,8 @@ resource "aws_instance" "grafana" {
   instance_type               = var.instance_type
   associate_public_ip_address = true
 
+  iam_instance_profile = var.iam_instance_profile
+
   user_data = templatefile("${path.module}/init.sh", {
     user = local.ssh_user
   })

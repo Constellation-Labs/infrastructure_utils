@@ -35,3 +35,15 @@ variable "instance_type" {
 variable "node_ips" {
   type = list(string)
 }
+
+variable "volume_az" {
+  type = string
+}
+
+variable "volume_device_name" {
+  type = string
+}
+
+variable "iam_instance_profile" {
+  type = string
+}
