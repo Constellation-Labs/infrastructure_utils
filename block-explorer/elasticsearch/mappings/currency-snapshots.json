@@ -37,11 +37,21 @@
           },
           "timestamp": {
             "type": "date"
+          },
+          "fee": {
+            "type": "long"
+          },
+          "ownerAddress": {
+            "type": "string"
+          },
+          "stakingAddress": {
+            "type": "string"
+          },
+          "sizeInKB": {
+            "type": "long"
           }
         }
       }
-
-
     }
   }
 }
