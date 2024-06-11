@@ -42,10 +42,10 @@
             "type": "long"
           },
           "ownerAddress": {
-            "type": "string"
+            "type": "keyword"
           },
           "stakingAddress": {
-            "type": "string"
+            "type": "keyword"
           },
           "sizeInKB": {
             "type": "long"
