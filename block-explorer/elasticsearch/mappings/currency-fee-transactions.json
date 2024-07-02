@@ -1,0 +1,48 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "data": {
+        "properties": {
+          "amount": {
+            "type": "long"
+          },
+          "destination": {
+            "type": "keyword"
+          },
+          "hash": {
+            "type": "keyword"
+          },
+          "parent": {
+            "properties": {
+              "hash": {
+                "type": "keyword"
+              },
+              "ordinal": {
+                "type": "long"
+              }
+            }
+          },
+          "salt": {
+            "type": "long"
+          },
+          "snapshotHash": {
+            "type": "keyword"
+          },
+          "snapshotOrdinal": {
+            "type": "long"
+          },
+          "source": {
+            "type": "keyword"
+          },
+          "timestamp": {
+            "type": "date"
+          }
+        }
+      },
+      "identifier": {
+        "type": "keyword"
+      }
+    }
+  }
+}
