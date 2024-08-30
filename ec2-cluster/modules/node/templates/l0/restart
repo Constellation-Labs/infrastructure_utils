@@ -5,6 +5,17 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-mv -v /home/${user}/tessellation/l0/logs /home/${user}/tessellation/l0/logs_$(date +"%Y-%m-%dT%H:%M:%SZ") 2>/dev/null
+# Define the archived_logs directory
+ARCHIVE_DIR="/home/admin/tessellation/l0/archived_logs"
+
+# Create the archived_logs directory if it doesn't exist
+mkdir -p "$ARCHIVE_DIR"
+
+# Move the logs with a timestamped backup to the archived_logs directory
+mv -v /home/admin/tessellation/l0/logs "$ARCHIVE_DIR/logs_$(date +"%Y-%m-%dT%H:%M:%SZ")" 2>/dev/null
+
+# Remove logs older than 3 months in the archived_logs directory
+find "$ARCHIVE_DIR" -name "logs_*" -type d -mtime +90 -exec rm -rf {} \;
+
 /home/${user}/tessellation/l0/update-seedlist
 systemctl restart l0
