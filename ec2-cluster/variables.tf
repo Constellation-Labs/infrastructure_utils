@@ -91,12 +91,12 @@ variable "load_balancer_l1_url" {
 }
 
 variable "grafana_volume_az" {
-  type = string
+  type    = string
   default = "us-west-1b"
 }
 
 variable "grafana_iam_instance_profile" {
-  type = string
+  type    = string
   default = null
 }
 
