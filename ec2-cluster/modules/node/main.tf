@@ -189,8 +189,8 @@ resource "aws_instance" "node" {
 
   provisioner "file" {
     content = templatefile("${path.module}/templates/auto-rollback.service", {
-      user                = local.ssh_user
-      block_explorer_url  = var.block_explorer_url
+      user                         = local.ssh_user
+      block_explorer_url           = var.block_explorer_url
       auto_rollback_check_interval = var.auto_rollback_check_interval
     })
     destination = "/tmp/auto-rollback.service"
@@ -217,7 +217,7 @@ resource "aws_instance" "node" {
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get -qq update",
-      "sudo apt-get -qq install openjdk-8-jdk-headless jq unzip incron pssh -y",
+      "sudo apt-get -qq install openjdk-11-jdk-headless jq unzip incron pssh -y",
       "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
       "unzip -q awscliv2.zip",
       "sudo ./aws/install",
@@ -232,4 +232,13 @@ resource "aws_instance" "node" {
     ]
   }
 
+}
+resource "aws_eip" "node_eip" {
+  count    = length(var.instance_keys)
+  instance = aws_instance.node[count.index].id
+
+  tags = {
+    Name = "EIP-node-${var.cluster_id}-${count.index}"
+    Env  = var.env
+  }
 }
