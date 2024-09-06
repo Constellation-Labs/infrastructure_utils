@@ -1,17 +1,21 @@
 data "aws_ami" "amzn2-ami" {
   most_recent = true
+  owners      = ["137112412989"]
 
   filter {
-    name = "name"
-    values = ["amzn2-ami-hvm-2.0.*"]
+    name   = "image-id"
+    values = ["ami-0f5bca4d7b49c9f49"]
   }
 
   filter {
-    name = "virtualization-type"
+    name   = "virtualization-type"
     values = ["hvm"]
   }
 
-  owners = ["amazon"]
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
 }
 
 locals {
