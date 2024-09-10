@@ -1,5 +1,5 @@
 output "grafana_url" {
-  value = "${aws_instance.grafana.public_ip}:3000"
+  value = "${aws_eip.grafana_eip.public_ip}:3000"
 }
 
 output "ssh" {
