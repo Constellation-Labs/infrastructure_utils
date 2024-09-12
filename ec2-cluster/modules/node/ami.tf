@@ -4,7 +4,7 @@ data "aws_ami" "node" {
 
   filter {
     name   = "image-id"
-    values = ["ami-072d0c3766d522751"]
+    values = ["ami-0523a6b76ce979642"] //debian-11-amd64
   }
 
   filter {

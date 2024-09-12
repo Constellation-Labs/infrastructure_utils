@@ -26,6 +26,9 @@ resource "null_resource" "cluster_provisioner" {
 
   provisioner "remote-exec" {
     inline = [
+      "sudo apt-get install jq -y",
+      "sudo apt-get install htop -y",
+      "sudo apt-get install lnav -y",
       "echo '${jsonencode(var.instance_ips)}' | jq '.[]' -r > /home/${var.ssh_user}/tessellation/cluster-hosts"
     ]
   }

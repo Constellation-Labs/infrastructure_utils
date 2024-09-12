@@ -83,3 +83,11 @@ resource "aws_instance" "grafana" {
   }
 
 }
+
+resource "aws_eip" "grafana_eip" {
+  instance = aws_instance.grafana.id
+  tags = {
+    Name = "EIP-grafana-${var.cluster_id}"
+    Env  = var.env
+  }
+}
